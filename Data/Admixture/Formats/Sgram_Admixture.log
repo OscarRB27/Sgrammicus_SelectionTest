@@ -1,0 +1,17 @@
+PLINK v1.90b6.21 64-bit (19 Oct 2020)
+Options in effect:
+  --allow-extra-chr
+  --file Data/Admixture/Formats/Sgram_Plink.ped
+  --out Data/Admixture/Formats/Sgram_Admixture
+  --recode 12
+
+Hostname: MacBook-Air-de-Oscar.local
+Working directory: /Users/oscarrbl/Documents/Doctorado/Cuarto_semestre/EvolMolAdap/Sgrammicus_Selection
+Start time: Mon May 16 19:27:23 2022
+
+Random number seed: 1652747243
+16384 MB RAM detected; reserving 8192 MB for main workspace.
+Error: Failed to open Data/Admixture/Formats/Sgram_Plink.ped.map. (--file
+expects a filename *prefix*; '.ped' and '.map' are automatically appended.)
+
+End time: Mon May 16 19:27:23 2022
