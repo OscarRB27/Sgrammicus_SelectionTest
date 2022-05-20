@@ -1,0 +1,186 @@
+---
+title: "Estimación de la heterocigosidad y coeficiente FST"
+author: "Óscar Romero Báez"
+date: "5/11/2022"
+output: html_document
+---
+
+Este script es usado para calcular la heterocigosidad y el coeficiente de diferenciación FST para dos sitios de muestreo de mi proyecto de investigación. Cabe mencionar que primero se debe de elegir la carpeta donde se encuentra la base datos de SNPs de cada sitio de muestreo.
+
+## Paqueterías requeridas
+```{r,results="hide"}
+library(vcfR)
+library(adegenet)
+library(hierfstat)
+library(fsthet)
+library(ggplot2)
+library(corrplot)
+```
+
+```{r}
+Sgram.vcf<-read.vcfR(file="Sg_Pols2M.vcf")
+```
+
+## Transformación del archivo vcf a genind
+
+```{r}
+#Base de datos genind 
+Sgram<-vcfR2genind(Sgram.vcf)
+```
+
+## Importación de archivo con información poblacional
+
+```{r}
+#Poblaciones para la base datos
+Ind_Pops<-read.table("Pops.txt",header=F)
+```
+
+## Información poblacional en archivo genind
+
+```{r}
+pop(Sgram)<-Ind_Pops$V2
+popNames(Sgram)
+```
+
+## Tranformación de formato genind a hierfstat y genepop.
+
+```{r}
+Sgram_genpop <-genind2genpop(Sgram)
+Sgram_fstat<-genind2hierfstat(Sgram)
+```
+
+## EStadísticos básicos globales
+
+```{r,results='hide'}
+(Sgram_BasStat<-basic.stats(Sgram_fstat))
+```
+
+## Estimación de la diversidad genética
+### Obtención de solo los valores de heterocigosidad observada (Ho) por población
+```{r,results='hide'}
+(Ho_Sgram<-Sgram_BasStat$Ho)
+```
+
+### Imputación de NAs de la base de Ho por población
+```{r}
+Ho_Sgram<- apply(Ho_Sgram, 2, function(x) replace(x, is.na(x),
+as.numeric(names(which.max(table(x))))))
+```
+
+### Calculo del promedio de Ho por cada población
+```{r}
+(Ho<-apply(Ho_Sgram,MARGIN = 2,FUN = mean) %>% round(digits=4))
+```
+
+### Obtención de solo los valores de heterocigosidad esperada (Hs) por población
+```{r}
+Hs_Sgram<-Sgram_BasStat$Hs
+```
+
+### Imputación de NAs de la base de Hs por población
+```{r}
+Hs_Sgram<- apply(Hs_Sgram, 2, function(x) replace(x, is.na(x),
+as.numeric(names(which.max(table(x))))))
+```
+
+### Calculo del promedio de Hs por cada población
+```{r}
+(Hs<-apply(Hs_Sgram,MARGIN = 2,FUN = mean) %>% round(digits=4))
+```
+
+## Union de Ho y Hs en una tabla
+```{r}
+(Het_Sgram<-cbind(Ho, Hs))
+```
+
+## Plot de las heterocigosidades
+```{r}
+par(mfrow=c(1,2))
+barplot(colMeans(Ho_Sgram,na.rm=T),las=2,main="Heterocigosidad Observada",col="blue")
+barplot(colMeans(Hs_Sgram,na.rm=T),las=2,main="Heterocigosidad Esperada",col="orange")
+```
+
+## Distancias genéticas
+```{r}
+Sgram_dist<-dist.genpop(Sgram_genpop,method="1")
+plot(hclust(Sgram_dist,method="ward.D2"))
+```
+
+## Multivariado
+
+```{r}
+X <- scaleGen(Sgram, NA.method="mean")
+pca1.ALL <- dudi.pca(X,scannf=FALSE,scale=FALSE)
+summary(pca1.ALL)
+
+#####Vamos a crear una paleta de colores###
+#cambia los colores a tu gusto
+Cols<-c("yellow","chocolate","green","blue")
+color_pallete_function <- colorRampPalette(colors =Cols,space = "Lab")
+num_colors <- nlevels(pop(Sgram))
+Colores.Sgram <- color_pallete_function(num_colors)
+
+###Plot del PCA
+plot(pca1.ALL$li,col=transp(Colores.Sgram[pop(Sgram)],0.8),pch=20,cex=2,xlab="PC1 37.20%",ylab="PC2 15.22%",bty="n",cex.axis=1.25,cex.lab=1)
+abline(h=0,lty=3,col="gray75")
+abline(v=0,lty=3,col="gray75")
+legend("topright",legend=levels(pop(Sgram)),xpd=TRUE,pt.cex=2,text.font=1,cex=1.25,col=Colores.Sgram,pch=20)
+```
+
+## PCA 2
+```{r}
+Loci.scale<-scaleGen(Sgram,NA.method="mean")
+C.datos.pca <- dudi.pca(Loci.scale,nf=4,scannf=FALSE,scale=T,center=T)
+
+#Extraemos las coordenadas
+C_datos.coords<-C.datos.pca$li
+C_datos.coords$loc <- Ind_Pops$V2
+
+#
+ggplot(C_datos.coords,aes(x=Axis1,y=Axis2,colour=loc))+geom_point(aes(shape=loc))+theme_light()+ scale_shape_manual(values=c(1:14))
+
+```
+
+## DPAC
+```{r}
+#Nota los argumentos n.da=2 y n.pca=8,
+#si cambias sus valores, cambian los resultados
+#consulta los manuales.
+Sgram_dpac <-dapc(Sgram,n.da=2,n.pca=8)
+scatter (Sgram_dpac, col =Colores.Sgram,cex=2,bg="white", solid=0.8,scree.da=FALSE,scree.pca=FALSE,lwd = 2, lty = 1, segcol = "black",legend = FALSE, posi.leg = "topright",cstar=1,cellipse=1,clabel =0.75,grid =TRUE) 
+```
+
+## Plot de probabilidad de asignación de individuos
+```{r}
+compoplot(Sgram_dpac,border="black",show.lab=T,posi=list(x=0,y=1.12),cleg=0.8,col=rainbow(14))
+```
+
+## DAPC 2
+```{r}
+#Sgram_dapc2<- dapc(Sgram)
+#scatter(Sgram_dapc2)
+#kgrp <- find.clusters(Sgram)
+#C.datos.dapc <- dapc(Sgram,grp=kgrp$grp)
+#scatter (C.datos.dapc)
+```
+
+```{r}
+#compoplot(C.datos.dapc,col=rainbow(14),border="black",show.lab=T,posi=list(x=0,y=1.12),cleg=0.8)
+```
+
+## Calculo del coeficiente FST pareado
+```{r}
+(Sgram_fst<-pairwise.neifst(Sgram_fstat))
+```
+
+```{r}
+heatmap(Sgram_fst,col=rev(heat.colors(30)),symm=F)
+```
+
+```{r}
+corrplot(Sgram_fst,is.corr=F,method="square",type="lower",col=rev(heat.colors(50)),
+         diag=FALSE)
+```
+
+
+
