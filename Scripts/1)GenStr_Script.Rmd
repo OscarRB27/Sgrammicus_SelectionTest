@@ -354,17 +354,23 @@ Sg.dapc<-dapc(Sg.gen, #Data base
 3) DAPC plot
 
 ```{r}
-##Ya salio con este
+#Obtain and transform to a data frame the individual coordinates of the linear discriminants of the DPCA
 Sg.ind.coord<-as.data.frame(Sg.dapc$ind.coord)
+#Obtain and transform the sampling sites into factors
 Sg.sites<-as.factor(Sg.data$loc)
+#Join both databases
 Sg.scatter<-cbind(Sg.ind.coord,Sg.sites)
+#Rename the columns
 colnames(Sg.scatter)[1:4]<-c("LD1","LD2","LD3","Sites")
-(Sg.ggscatter<-ggscatter(Sg.scatter,x="LD1",y="LD2",col="Sites",
-              ellipse=TRUE,mean.point=F,star.plot=TRUE)+
-              scale_color_brewer(palette="Dark2")+
-              geom_hline(yintercept=0,linetype="dashed",color="black",size=0.5) + 
-              geom_vline(xintercept=0,linetype="dashed",color="black",size=0.5)+
-              theme_bw())
+#Plot DPCA
+(Sg.ggscatter<-ggscatter(Sg.scatter,x="LD1",y="LD2",col="Sites", #Axis and color definition
+               ellipse=TRUE, #Add ellipse
+               mean.point=F, #Remove mean point
+               star.plot=TRUE)+ #Add lines in points 
+               scale_color_brewer(palette="Dark2")+ #Color palette
+               geom_hline(yintercept=0,linetype="dashed",color="black",size=0.5)+ #Add line in y-axis
+               geom_vline(xintercept=0,linetype="dashed",color="black",size=0.5)+ #Add line in x-axis
+               theme_bw()) #Canvas definition
 ```
 
 Save plot to pdf file
