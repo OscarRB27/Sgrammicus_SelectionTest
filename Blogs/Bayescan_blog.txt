@@ -2,8 +2,8 @@ BayeScan
 
 Posibles parámetros
 
-Par1
-./BayeScan2.1_macos64bits Sgram_Pols_BayeScan -o Sgram_bsca_RE1 -threads 6 -n 500 -thin 100 -nbp 20 -pilot 50 -burn 50
+Parametros1_Prueba1
+Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_Agr_Bayescan -o Analysis/BayeScan/Results/Sgram_bsca_RE1 -threads 6 -n 5000 -thin 20 -nbp 20 -pilot 1000 -burn 10000
 
 Parámetros tesis Ricardo
 ./BayeScan2.1_macos64bits Sgram_Pols_BayeScan -o Sgram_bsca_RE2 -threads 6 -n 50000 -thin 20 -nbp 20 -pilot 10000 -burn 100000
