@@ -284,7 +284,7 @@ Sg.grp<-as.data.frame(Sg.grp)
          theme(axis.text.x=element_text(size=7.5,angle=90,hjust=0), #Size and position of axis.text.x
                axis.text.y=element_text(size=8), #Size of axis.text.x
                legend.position="none", #Remove legend
-               strip.text.x=element_text(size=0), #Remove numbers of the k
+               strip.text.x=element_text(size=0), #Remove numbers of k
                axis.title.x=element_blank(), #Remove title of axis x
                strip.background=element_blank())) #Remove rectangle
 ```
