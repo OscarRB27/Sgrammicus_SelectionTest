@@ -5,27 +5,41 @@ date: '2022-05-21'
 output: html_document
 ---
 
-This analysis is part of my research project and this script will be used to analyze the output obtained from the BayeScan software from the SNP data obtained from four different sites where the lizard *Sceloporus grammicus* was sampled. The `plot_bayescan()` function that comes with the BayeScan software will be used for this propose. (Follows M and OE Gaggiotti, 2008).
+This analysis is part of my research project and this script will be used to analyze the outputs obtained from the BayeScan software from the SNP data obtained from four different sites where the lizard *Sceloporus grammicus* was sampled. The `plot_bayescan()` function that comes with the BayeScan software will be used for this propose. (Follows M and OE Gaggiotti, 2008).
 
 Because the sampling sites belong to two forest areas and two agricultural areas, the analysis was carried out separately, analyzing only the forest sites in one test and the agricultural sites in another.
 
 The purpose of testing separately is because we want to see if there are candidate SNPs for selection that differ due to the different habitat types that organisms inhabit.
 
+The format that BayeScan requires to run can be obtained using the PGDSpider program (Lischer HEL and Excoffier L, 2012). If you need to download both programs, go to the following links: http://cmpg.unibe.ch/software/BayeScan/download.html (BayeScan), http://www.cmpg.unibe.ch/software/PGDSpider/#Download_and_Installation_Instructions (PGDSpider).
+
 Go to the **Sgrammicus_SelectionTest** folder to work with.
 
-1) Packages required
+1) Run BayeScan
+
+Parameters used to run BayeScan
+
+Parameters Forest sites
+`Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_For_Bayescan`
+`-o Analysis/BayeScan/Results/Sg_For/Sg_For_Bayescan_RE1 -threads 4 -n 5000 -thin 20 -nbp 20 -pilot 1000 -burn 10000`
+
+Parameters Agricultural sites
+`Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_Agr_Bayescan` 
+`-o Analysis/BayeScan/Results/Sg_Agr/Sg_Agr_Bayescan_RE1 -threads 6 -n 5000 -thin 20 -nbp 20 -pilot 1000 -burn 10000`
+
+2) Packages required
 
 ```{r}
 library(ggplot2)
 ```
 
-2) Source to plot_bayescan() function that comes with BayeScan
+3) Source to plot_bayescan() function that comes with BayeScan
 
 ```{r}
 source("Analysis/BayeScan/Program/plot_R.r")
 ```
 
-3) Load BayeScan outputs
+4) Load BayeScan outputs
 
 ```{r}
 #Output of forest sites
@@ -37,14 +51,13 @@ Sg.for<-read.table("Analysis/BayeScan/Results/Sg_For/Sg_For_Bayescan_RE1_fst.txt
 
 #Output of agricultural sites
 Sg.agr<-read.table("Analysis/BayeScan/Results/Sg_Agr/Sg_Agr_BayeScan_RE1_fst.txt",  #File path
-                       header=F, #Indicates that the variables in the file do not have names
-                       sep="", #Type of data separation
-                       col.names=c("bayescan_number","prob",
-                                   "log10(PO)","qval","alpha","fst")) #Put names to variables of file
-
+                  header=F, #Indicates that the variables in the file do not have names
+                  sep="", #Type of data separation
+                  col.names=c("bayescan_number","prob",
+                              "log10(PO)","qval","alpha","fst")) #Put names to variables of file
 ```
 
-4) Analysis and plotting of the outputs
+5) Analysis and plotting of the outputs
 
 ```{r}
 #Forest sites
@@ -53,7 +66,7 @@ Sg.for.res<-plot_bayescan(Sg.for, #Data
                           FDR=0.01) #False discovery rate
 
 #Review the number of outliers detected as candidates under selection
-Sg.for.res$nb_outliers
+Sg.for.res$nb_outliers #Very large number!
 ```
 
 ```{r}
@@ -66,7 +79,7 @@ Sg.agr.res<-plot_bayescan(Sg.agr, #Data
 Sg.agr.res$nb_outliers #Very large number!
 ```
 
-5) False discovery rate correction
+6) False discovery rate correction
 
 ```{r}
 #Forest sites
@@ -105,7 +118,7 @@ Likelihood_FDR_A<-p.adjust(Likelihood_Pval_A,"BH") #Correction method used, know
 ```
 
 
-6) Create a new data frame with the results that includes the original data and the adjusted p-values
+7) Create a new data frame with the results that includes the original data and the adjusted p-values
 
 ```{r}
 #Forest sites
@@ -119,10 +132,6 @@ head(Sg.For.res)
 
 #Eexamine which ones are significant now
 sum(Sg.For.res$pval.adjust<=0.001)
-
-SgA.tab<-as.data.frame(Likelihood_FDR_A)
-
-write.table(SgA.tab,file="SgA.results.txt",row.names=F,col.names=T,quote=F)
 ```
 
 ```{r}
@@ -139,24 +148,23 @@ head(Sg.Agr.res)
 sum(Sg.Agr.res$pval.adjust<=0.001)
 ```
 
-
-7) Explore significant outliers with a plot
+8) Explore significant outliers with a plot
 
 ```{r}
 #Forest sites
-(Sg.For.out<-ggplot(Sg.For.res,aes(x=fst, y=alpha)) +
-       geom_point(size=2,alpha=0.5,
-       aes(colour=pval.adjust<=0.001)) +
-  theme_bw()+ #Canvas definition
-  ylab("Alpha")+ #y lab name
-  xlab("Fst")+ #x lab name
-  labs(color="Adjusted p-values")+
-  ggtitle("Forest sites")+
-  theme(plot.title=element_text(hjust=0.5),
-        axis.title.y = element_text(size=13),
-        axis.title.x = element_text(size=13))+
-  annotate ("text",x=0.742,y=0.09,label="L.6319",size=3)+
-  scale_color_manual(values=c("black","red")))
+(Sg.For.out<-ggplot(Sg.For.res,aes(x=fst, y=alpha))+ #Axis definition
+                    geom_point(size=2,alpha=0.5, #Geometry definition
+                    aes(colour=pval.adjust<=0.001))+ #Points color adjusted to p-val.adjust
+                    scale_color_manual(values=c("black","red"))+ #Define point colors
+                    theme_bw()+ #Canvas definition
+                    ylab("Alpha")+ #y-lab name
+                    xlab("Fst")+ #x-lab name
+                    labs(color="Adjusted p-values")+ #Rename legend title
+                    ggtitle("Forest sites")+ #Put title
+                    theme(plot.title=element_text(hjust=0.5), #Center title
+                    axis.title.y=element_text(size=13), #y-axis title size
+                    axis.title.x=element_text(size=13))+ #x-axis title size
+                    annotate("text",x=0.742,y=0.09,label="L.6319",size=3)) #Add candidate SNP name
 ```
 
 Save plot to pdf file
@@ -168,20 +176,20 @@ ggsave("Analysis/BayeScan/Figures/Sg.For.out.pdf",dpi=300,limitsize=TRUE,
 
 ```{r}
 #Agricultural sites
-(Sg.Agr.out<-ggplot(Sg.Agr.res,aes(x=fst, y=alpha)) +
-       geom_point(size=2,alpha=0.5,
-       aes(colour=pval.adjust<=0.001)) +
-  theme_bw()+ #Canvas definition
-  ylab("Alpha")+ #y lab name
-  xlab("Fst")+ #x lab name
-  labs(color="Adjusted p-values")+
-  ggtitle("Agricultural sites")+
-  theme(plot.title=element_text(hjust=0.5),
-        axis.title.y = element_text(size=13),
-        axis.title.x = element_text(size=13))+
-        annotate ("text",x=0.31,y=0.198,label="L.1436",size=3)+
-        annotate ("text",x=0.292,y=0.102,label="L.1437",size=3)+
-  scale_color_manual(values=c("black","red")))
+(Sg.Agr.out<-ggplot(Sg.Agr.res,aes(x=fst,y=alpha))+ #Axis definition
+                   geom_point(size=2,alpha=0.5, #Geometry definition
+                   aes(colour=pval.adjust<=0.001))+ #Points color adjusted to p-val.adjust
+                   scale_color_manual(values=c("black","red"))+ #Define point colors
+                   theme_bw()+ #Canvas definition
+                   ylab("Alpha")+ #y-lab name
+                   xlab("Fst")+ #x-lab name
+                   labs(color="Adjusted p-values")+ #Rename legend title
+                   ggtitle("Agricultural sites")+ #Put title
+                   theme(plot.title=element_text(hjust=0.5), #Center title
+                   axis.title.y=element_text(size=13), #y-axis title size
+                   axis.title.x=element_text(size=13))+ #x-axis title size
+                   annotate("text",x=0.31,y=0.198,label="L.1436",size=3)+ #Add candidate SNP name
+                   annotate("text",x=0.292,y=0.102,label="L.1437",size=3)) #Add candidate SNP name
 ```
 
 Save plot to pdf file
