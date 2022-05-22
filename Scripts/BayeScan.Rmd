@@ -1,0 +1,192 @@
+---
+title: "BayeScan"
+author: "Óscar Romero Báez"
+date: '2022-05-21'
+output: html_document
+---
+
+This analysis is part of my research project and this script will be used to analyze the output obtained from the BayeScan software from the SNP data obtained from four different sites where the lizard *Sceloporus grammicus* was sampled. The `plot_bayescan()` function that comes with the BayeScan software will be used for this propose. (Follows M and OE Gaggiotti, 2008).
+
+Because the sampling sites belong to two forest areas and two agricultural areas, the analysis was carried out separately, analyzing only the forest sites in one test and the agricultural sites in another.
+
+The purpose of testing separately is because we want to see if there are candidate SNPs for selection that differ due to the different habitat types that organisms inhabit.
+
+Go to the **Sgrammicus_SelectionTest** folder to work with.
+
+1) Packages required
+
+```{r}
+library(ggplot2)
+```
+
+2) Source to plot_bayescan() function that comes with BayeScan
+
+```{r}
+source("Analysis/BayeScan/Program/plot_R.r")
+```
+
+3) Load BayeScan outputs
+
+```{r}
+#Output of forest sites
+Sg.for<-read.table("Analysis/BayeScan/Results/Sg_For/Sg_For_Bayescan_RE1_fst.txt", #File path
+                  header=F, #Indicates that the variables in the file do not have names
+                  sep="", #Type of data separation
+                  col.names=c("bayescan_number","prob",
+                              "log10(PO)","qval","alpha","fst")) #Put names to variables of file
+
+#Output of agricultural sites
+Sg.agr<-read.table("Analysis/BayeScan/Results/Sg_Agr/Sg_Agr_BayeScan_RE1_fst.txt",  #File path
+                       header=F, #Indicates that the variables in the file do not have names
+                       sep="", #Type of data separation
+                       col.names=c("bayescan_number","prob",
+                                   "log10(PO)","qval","alpha","fst")) #Put names to variables of file
+
+```
+
+4) Analysis and plotting of the outputs
+
+```{r}
+#Forest sites
+#Analysis of forest sites using plot_bayescan function
+Sg.for.res<-plot_bayescan(Sg.for, #Data
+                          FDR=0.01) #False discovery rate
+
+#Review the number of outliers detected as candidates under selection
+Sg.for.res$nb_outliers
+```
+
+```{r}
+#Agricultural sites
+#Analysis of agricultural sites using plot_bayescan function
+Sg.agr.res<-plot_bayescan(Sg.agr, #Data
+                          FDR=0.01) #False discovery rate
+
+#Review the number of outliers detected as candidates under selection
+Sg.agr.res$nb_outliers #Very large number!
+```
+
+5) False discovery rate correction
+
+```{r}
+#Forest sites
+#Estimate the empirical cumulative distribution function (ECDF) for output
+Likelihood_Function_F<-ecdf(Sg.for$alpha)
+head(Likelihood_Function_F)
+#Function evaluation for output
+#Run function
+Eval_F<-Likelihood_Function_F(Sg.for[,"alpha"]) 
+#Check results
+head(Eval_F)
+
+#Calculate the p-value, as 1 - the values of the previous results
+Likelihood_Pval_F<-1-Eval_F
+
+#Since many comparisons are made, it is necessary to correct the p-values, which make with the function p.adjust
+Likelihood_FDR_F<-p.adjust(Likelihood_Pval_F,"BH") #Correction method used, known as False Discovery Rate
+```
+
+```{r}
+#Agricultural sites
+#Estimate the empirical cumulative distribution function (ECDF) for output
+Likelihood_Function_A<-ecdf(Sg.agr$alpha)
+
+#Function evaluation for output
+#Run function
+Eval_A<-Likelihood_Function_F(Sg.agr[,"alpha"]) 
+#Check results
+head(Eval_A)
+
+#Calculate the p-value, as 1 - the values of the previous results
+Likelihood_Pval_A<-1-Eval_A
+
+#Since many comparisons are made, it is necessary to correct the p-values, which make with the function p.adjust
+Likelihood_FDR_A<-p.adjust(Likelihood_Pval_A,"BH") #Correction method used, known as False Discovery Rate
+```
+
+
+6) Create a new data frame with the results that includes the original data and the adjusted p-values
+
+```{r}
+#Forest sites
+#Copy original data
+Sg.For.res<-Sg.for 
+
+#Add p-values
+Sg.For.res$pval<-Likelihood_Pval_F
+Sg.For.res$pval.adjust<-Likelihood_FDR_F
+head(Sg.For.res)
+
+#Eexamine which ones are significant now
+sum(Sg.For.res$pval.adjust<=0.001)
+
+SgA.tab<-as.data.frame(Likelihood_FDR_A)
+
+write.table(SgA.tab,file="SgA.results.txt",row.names=F,col.names=T,quote=F)
+```
+
+```{r}
+#Agricultural sites
+#Copy original data
+Sg.Agr.res<-Sg.agr 
+
+#Add p-values
+Sg.Agr.res$pval<-Likelihood_Pval_A
+Sg.Agr.res$pval.adjust<-Likelihood_FDR_A
+head(Sg.Agr.res)
+
+#Eexamine which ones are significant now
+sum(Sg.Agr.res$pval.adjust<=0.001)
+```
+
+
+7) Explore significant outliers with a plot
+
+```{r}
+#Forest sites
+(Sg.For.out<-ggplot(Sg.For.res,aes(x=fst, y=alpha)) +
+       geom_point(size=2,alpha=0.5,
+       aes(colour=pval.adjust<=0.001)) +
+  theme_bw()+ #Canvas definition
+  ylab("Alpha")+ #y lab name
+  xlab("Fst")+ #x lab name
+  labs(color="Adjusted p-values")+
+  ggtitle("Forest sites")+
+  theme(plot.title=element_text(hjust=0.5),
+        axis.title.y = element_text(size=13),
+        axis.title.x = element_text(size=13))+
+  annotate ("text",x=0.742,y=0.09,label="L.6319",size=3)+
+  scale_color_manual(values=c("black","red")))
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/BayeScan/Figures/Sg.For.out.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+```{r}
+#Agricultural sites
+(Sg.Agr.out<-ggplot(Sg.Agr.res,aes(x=fst, y=alpha)) +
+       geom_point(size=2,alpha=0.5,
+       aes(colour=pval.adjust<=0.001)) +
+  theme_bw()+ #Canvas definition
+  ylab("Alpha")+ #y lab name
+  xlab("Fst")+ #x lab name
+  labs(color="Adjusted p-values")+
+  ggtitle("Agricultural sites")+
+  theme(plot.title=element_text(hjust=0.5),
+        axis.title.y = element_text(size=13),
+        axis.title.x = element_text(size=13))+
+        annotate ("text",x=0.31,y=0.198,label="L.1436",size=3)+
+        annotate ("text",x=0.292,y=0.102,label="L.1437",size=3)+
+  scale_color_manual(values=c("black","red")))
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/BayeScan/Figures/Sg.Agr.out.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
