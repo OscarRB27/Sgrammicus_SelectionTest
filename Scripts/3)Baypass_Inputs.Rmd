@@ -7,7 +7,9 @@ output: html_document
 
 This script is used to get the input required to run the BayPass program (Gautier M, 2015; Olazcuaga L et al., 2020). The file to start the process is the .vcf file database.
 
-If it is required to download the program, it can be obtained at this link: http://www1.montpellier.inra.fr/CBGP/software/baypass/download.html
+If it is required to download the program, it can be obtained at this link: http://www1.montpellier.inra.fr/CBGP/software/baypass/download.html.
+
+Go to the **Sgrammicus_Selection** folder to work.
 
 ### 1) Required libraries
 
@@ -24,7 +26,7 @@ Sg.data<-read.vcfR("Data/Loci_Data/Sg_Pols2M_7000snps.vcf")
 #The info of the loci is obtained
 Sg_loci.info<-Sg.data@fix
 #Save to a .txt file
-write.table(Sg_loci.info,file="Data/BayPass/Sg_Loci_info.txt",sep=",",col.names=T,row.names=F,quote=FALSE)
+write.table(Sg_loci.info,file="Data/BayPass/Data_Loci/Sg_Loci_info.txt",sep=",",col.names=T,row.names=F,quote=FALSE)
 #Transform SNPs database to genind object
 Sg.gen<-vcfR2genind(Sg.data)
 
@@ -104,10 +106,10 @@ a) All sites
 SN_formato_all.baypass<-cbind(Pop_P5For.baypass,Pop_P5Agr.baypass,Pop_P6For.baypass,Pop_P6Agr.baypass)
 
 #Input for BayPass is written and saved
-write.table(SN_formato_all.baypass,file="Data/BayPass/SN_baypass_all.input",row.names=F,col.names=F,sep=" ",quote=FALSE)
+write.table(SN_formato_all.baypass,file="Data/BayPass/Input_Loci/SN_baypass_all.input",row.names=F,col.names=F,sep=" ",quote=FALSE)
 
 #It is useful to have the numbered list of the loci, to know which is which when you have results. The format is written and saved
-write.table(rownames(SN_formato_all.baypass),file="Data/BayPass/SN_baypass_all.loci",row.names=T,col.names=F,sep=" ",quote=FALSE)
+write.table(rownames(SN_formato_all.baypass),file="Data/BayPass/Data_Loci/SN_baypass_all.loci",row.names=T,col.names=F,sep=" ",quote=FALSE)
 ```
 
 b) Only forest sites
@@ -117,10 +119,10 @@ b) Only forest sites
 SN_formato_for.baypass<-cbind(Pop_P5For.baypass,Pop_P6For.baypass)
 
 #Input for BayPass is written and saved
-write.table(SN_formato_for.baypass,file="Data/BayPass/SN_baypass_for.input",row.names=F,col.names=F,sep=" ",quote=FALSE)
+write.table(SN_formato_for.baypass,file="Data/BayPass/Input_Loci/SN_baypass_for.input",row.names=F,col.names=F,sep=" ",quote=FALSE)
 
 #It is useful to have the numbered list of the loci, to know which is which when you have results. The format is written and saved
-write.table(rownames(SN_formato_for.baypass),file="Data/BayPass/SN_baypass_for.loci",row.names=T,col.names=F,sep=" ",quote=FALSE)
+write.table(rownames(SN_formato_for.baypass),file="Data/BayPass/Data_Loci/SN_baypass_for.loci",row.names=T,col.names=F,sep=" ",quote=FALSE)
 ```
 
 c) Only agricultural sites
@@ -130,8 +132,8 @@ c) Only agricultural sites
 SN_formato_agr.baypass<-cbind(Pop_P5Agr.baypass,Pop_P6Agr.baypass)
 
 #Input for BayPass is written and saved
-write.table(SN_formato_agr.baypass,file="Data/BayPass/SN_baypass_agr.input",row.names=F,col.names=F,sep=" ",quote=FALSE)
+write.table(SN_formato_agr.baypass,file="Data/BayPass/Input_Loci/SN_baypass_agr.input",row.names=F,col.names=F,sep=" ",quote=FALSE)
 
 #It is useful to have the numbered list of the loci, to know which is which when you have results. The format is written and saved
-write.table(rownames(SN_formato_agr.baypass),file="Data/BayPass/SN_baypass_agr.loci",row.names=T,col.names=F,sep=" ",quote=FALSE)
+write.table(rownames(SN_formato_agr.baypass),file="Data/BayPass/Data_Loci/SN_baypass_agr.loci",row.names=T,col.names=F,sep=" ",quote=FALSE)
 ```

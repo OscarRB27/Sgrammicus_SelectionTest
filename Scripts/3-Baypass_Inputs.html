@@ -374,7 +374,8 @@ pre code {
 program (Gautier M, 2015; Olazcuaga L et al., 2020). The file to start
 the process is the .vcf file database.</p>
 <p>If it is required to download the program, it can be obtained at this
-link: <a href="http://www1.montpellier.inra.fr/CBGP/software/baypass/download.html" class="uri">http://www1.montpellier.inra.fr/CBGP/software/baypass/download.html</a></p>
+link: <a href="http://www1.montpellier.inra.fr/CBGP/software/baypass/download.html" class="uri">http://www1.montpellier.inra.fr/CBGP/software/baypass/download.html</a>.</p>
+<p>Go to the <strong>Sgrammicus_Selection</strong> folder to work.</p>
 <div id="required-libraries" class="section level3">
 <h3>1) Required libraries</h3>
 <pre class="r"><code>library(vcfR)</code></pre>
@@ -426,7 +427,7 @@ Processed variant: 7599
 <pre class="r"><code>#The info of the loci is obtained
 Sg_loci.info&lt;-Sg.data@fix
 #Save to a .txt file
-write.table(Sg_loci.info,file=&quot;Data/BayPass/Sg_Loci_info.txt&quot;,sep=&quot;,&quot;,col.names=T,row.names=F,quote=FALSE)
+write.table(Sg_loci.info,file=&quot;Data/BayPass/Data_Loci/Sg_Loci_info.txt&quot;,sep=&quot;,&quot;,col.names=T,row.names=F,quote=FALSE)
 #Transform SNPs database to genind object
 Sg.gen&lt;-vcfR2genind(Sg.data)
 
@@ -499,10 +500,10 @@ function</h3>
 SN_formato_all.baypass&lt;-cbind(Pop_P5For.baypass,Pop_P5Agr.baypass,Pop_P6For.baypass,Pop_P6Agr.baypass)
 
 #Input for BayPass is written and saved
-write.table(SN_formato_all.baypass,file=&quot;Data/BayPass/SN_baypass_all.input&quot;,row.names=F,col.names=F,sep=&quot; &quot;,quote=FALSE)
+write.table(SN_formato_all.baypass,file=&quot;Data/BayPass/Input_Loci/SN_baypass_all.input&quot;,row.names=F,col.names=F,sep=&quot; &quot;,quote=FALSE)
 
 #It is useful to have the numbered list of the loci, to know which is which when you have results. The format is written and saved
-write.table(rownames(SN_formato_all.baypass),file=&quot;Data/BayPass/SN_baypass_all.loci&quot;,row.names=T,col.names=F,sep=&quot; &quot;,quote=FALSE)</code></pre>
+write.table(rownames(SN_formato_all.baypass),file=&quot;Data/BayPass/Data_Loci/SN_baypass_all.loci&quot;,row.names=T,col.names=F,sep=&quot; &quot;,quote=FALSE)</code></pre>
 <ol start="2" style="list-style-type: lower-alpha">
 <li>Only forest sites</li>
 </ol>
@@ -510,10 +511,10 @@ write.table(rownames(SN_formato_all.baypass),file=&quot;Data/BayPass/SN_baypass_
 SN_formato_for.baypass&lt;-cbind(Pop_P5For.baypass,Pop_P6For.baypass)
 
 #Input for BayPass is written and saved
-write.table(SN_formato_for.baypass,file=&quot;Data/BayPass/SN_baypass_for.input&quot;,row.names=F,col.names=F,sep=&quot; &quot;,quote=FALSE)
+write.table(SN_formato_for.baypass,file=&quot;Data/BayPass/Input_Loci/SN_baypass_for.input&quot;,row.names=F,col.names=F,sep=&quot; &quot;,quote=FALSE)
 
 #It is useful to have the numbered list of the loci, to know which is which when you have results. The format is written and saved
-write.table(rownames(SN_formato_for.baypass),file=&quot;Data/BayPass/SN_baypass_for.loci&quot;,row.names=T,col.names=F,sep=&quot; &quot;,quote=FALSE)</code></pre>
+write.table(rownames(SN_formato_for.baypass),file=&quot;Data/BayPass/Data_Loci/SN_baypass_for.loci&quot;,row.names=T,col.names=F,sep=&quot; &quot;,quote=FALSE)</code></pre>
 <ol start="3" style="list-style-type: lower-alpha">
 <li>Only agricultural sites</li>
 </ol>
@@ -521,10 +522,10 @@ write.table(rownames(SN_formato_for.baypass),file=&quot;Data/BayPass/SN_baypass_
 SN_formato_agr.baypass&lt;-cbind(Pop_P5Agr.baypass,Pop_P6Agr.baypass)
 
 #Input for BayPass is written and saved
-write.table(SN_formato_agr.baypass,file=&quot;Data/BayPass/SN_baypass_agr.input&quot;,row.names=F,col.names=F,sep=&quot; &quot;,quote=FALSE)
+write.table(SN_formato_agr.baypass,file=&quot;Data/BayPass/Input_Loci/SN_baypass_agr.input&quot;,row.names=F,col.names=F,sep=&quot; &quot;,quote=FALSE)
 
 #It is useful to have the numbered list of the loci, to know which is which when you have results. The format is written and saved
-write.table(rownames(SN_formato_agr.baypass),file=&quot;Data/BayPass/SN_baypass_agr.loci&quot;,row.names=T,col.names=F,sep=&quot; &quot;,quote=FALSE)</code></pre>
+write.table(rownames(SN_formato_agr.baypass),file=&quot;Data/BayPass/Data_Loci/SN_baypass_agr.loci&quot;,row.names=T,col.names=F,sep=&quot; &quot;,quote=FALSE)</code></pre>
 </div>
 
 

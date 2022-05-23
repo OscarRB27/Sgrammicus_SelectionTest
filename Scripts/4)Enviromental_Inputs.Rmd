@@ -1,0 +1,203 @@
+---
+title: "Getting inputs of environment variables"
+author: "Óscar Romero Báez"
+date: '2022-05-23'
+output: html_document
+---
+
+This script is used to estimate the correlations that exist between the environmental variables in my research project, which was done using the `panelutils.R` function (Gillet, 2012). Also, Environmental variables were standardized to homogenize the range of values.
+
+Finally, the input files required to run BayPass are created. Go to the **Sgrammicus_Selection** folder to work.
+
+### 1) Required libraries
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(GGally)  
+```
+
+### 2) Required database is loaded
+
+```{r}
+#Enviromental variables database
+Sg.env<-read.table("Data/Env_Data/Env_Data.txt",header=T)
+
+#Explore data
+str(Sg.env)
+summary(Sg.env)
+```
+### 3) Correlations between variables
+ 
+All sites
+
+```{r}
+#Calculate and plot correlations between variables
+(Sg_corr_all<-ggpairs(Sg.env[,c(3:11)], #Variables selection
+              aes(alpha = 0.5), #Transparency
+              upper=list(continuous=wrap("cor",size=4)), #Size of correlation values
+              lower=list(continuous="smooth",alpha = 0.3,size=0.1))+ #Add trend line
+              theme_bw()) #Canvas definition
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg_corr_all.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+Only two moderately high correlations were obtained, between NDVI-MSI and At-As. Following the **"rule of thumb"**, which indicates (Krehbiel, 2004):
+
+- Coefficient between −0.3 and +0.3 = weak correlation. 
+- Coefficient less than −0.7 or greater than +0.7 = strong correlation. 
+- Coefficient between −0.3 and −0.7 or between +0.3 and +0.7 = moderate correlation.  
+
+Therefore, no variable presented a strong correlation.
+
+### 4) Standardization of variables
+
+```{r}
+#Standardization
+Sg.std.env<-as.data.frame(scale(Sg.env[,c(3:11)],center=T,scale=T)) %>% round(digits=4)
+
+#Creation of a new database with standardized values
+Sg.std.env<-cbind(Sg.env[,c(1:2)],Sg.std.env)
+```
+
+### 5) Calculation of the mean of each variable by site
+
+a) P5For site
+
+```{r}
+#Extraction of P5For samples
+Vars_P5For<-filter(Sg.std.env,Site=="P5For")
+
+#Means calculation of P5For samples
+P5For.mean<-apply(Vars_P5For[,3:11],MARGIN=2,FUN=mean) %>% round(digits=4)
+```
+
+b) P5Agr site
+
+```{r}
+#Extraction of P5Agr samples
+Vars_P5Agr<-filter(Sg.std.env,Site=="P5Agr") 
+
+#Means calculation of P5Agr samples
+P5Agr.mean<-apply(Vars_P5Agr[,3:11],MARGIN=2,FUN=mean) %>% round(digits=4)
+```
+
+c) P6For site
+
+```{r}
+#Extraction of P6For samples
+Vars_P6For<-filter(Sg.std.env,Site=="P6For")
+
+#Means calculation of P6For samples
+P6For.mean<-apply(Vars_P6For[,3:11],MARGIN=2,FUN=mean) %>% round(digits=4)
+```
+
+d) P6Agr site
+
+```{r}
+#Extraction of P6Agr samples
+Vars_P6Agr<-filter(Sg.std.env,Site=="P6Agr") 
+
+#Means calculation of P6Agr samples
+P6Agr.mean<-apply(Vars_P6Agr[,3:11],MARGIN=2,FUN=mean) %>% round(digits=4)
+```
+
+### 6) Combination of databases and creating environment variable inputs to run BayPass
+
+6.1) Combination of all the database by site
+
+```{r}
+#Base with means
+(Env_all<-as.data.frame(cbind(P5For.mean,P5Agr.mean,P6For.mean,P6Agr.mean)))
+```
+
+6.2) Combination and calculation of correlation between variables of forest site databases
+
+```{r}
+#Base with all variables values of forest sites
+Env_For_all<-as.data.frame(rbind(Vars_P5For,Vars_P6For))
+
+#Calculate and plot correlations between variables
+(Sg_corr_for<-ggpairs(Env_For_all[,c(3:11)], #Variables selection
+                      aes(alpha = 0.5), #Transparency
+                      upper=list(continuous=wrap("cor",size=4)), #Size of correlation values
+                      lower=list(continuous="smooth",alpha = 0.3,size=0.1))+ #Add trend line
+                      theme_bw()) #Canvas definition
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg_corr_for.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+The correlations by forest sites indicate that there was a strong correlation (>0.7) between the DEM and RH variables, so one of these variables was discarded for subsequent analyses. For this case, DEM was the one that was discarded because it showed a greater number of significant correlations with other variables.
+
+6.2.1) Creation of the input file for Baypass omitting the variable with strong correlation for forest sites.
+
+```{r}
+#Base with means
+Env_For<-as.data.frame(cbind(P5For.mean,P6For.mean))
+
+#Variables selection, skipping DEM
+(Env_For<-Env_For[c(1:4,6:9),])
+```
+
+6.3) Combination and calculation of correlation between variables of agricultural site databases
+
+```{r}
+#Base with all variables values of agricultural sites
+Env_Agr_all<-as.data.frame(rbind(Vars_P5Agr,Vars_P6Agr))
+
+#Calculate and plot correlations between variables
+(Sg_corr_agr<-ggpairs(Env_Agr_all[,c(3:11)], #Variables selection
+                      aes(alpha = 0.5), #Transparency
+                      upper=list(continuous=wrap("cor",size=4)), #Size of correlation values
+                      lower=list(continuous="smooth",alpha = 0.3,size=0.1))+ #Add trend line
+                      theme_bw()) #Canvas definition
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg_corr_agr.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+For agricultural areas, two high correlations (>0.7) were found between the variables At-St and NDVI-MSI. Therefore, one variable was omitted from each of these. For this case, St and NDVI, which were the ones that showed a greater number of significant correlations with other variables, although these were not > 0.7.
+
+6.3.1) Creation of the input file for Baypass omitting the variables with strong correlation for agricultural sites.
+
+```{r}
+#Base with means
+Env_Agr<-as.data.frame(cbind(P5Agr.mean,P6Agr.mean))
+
+#Variables selection, skipping St and NDVI
+(Env_Agr<-Env_Agr[c(2:8),])
+```
+
+### 7) Save tables
+
+a) All sites input
+
+```{r}
+write.table(Env_all,file="Data/BayPass/Input_Vars/Env_All.txt",row.names=F,col.names=F,quote=F,sep="\t")
+```
+
+b) Forest site input
+
+```{r}
+write.table(Env_For,file="Data/BayPass/Input_Vars/Env_For.txt",row.names=F,col.names=F,quote=F,sep="\t")
+```
+
+c) Agricultural site input
+
+```{r}
+write.table(Env_Agr,file="Data/BayPass/Input_Vars/Env_Agr.txt",row.names=F,col.names=F,quote=F,sep="\t")
+```
