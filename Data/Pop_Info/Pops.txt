@@ -1,4 +1,4 @@
-ind	loc
+id	loc
 P5-Sg1	P5For
 P5-Sg2	P5For
 P5-Sg3	P5For

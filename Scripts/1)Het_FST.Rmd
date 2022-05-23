@@ -7,7 +7,7 @@ output: html_document
 
 This script is used to calculate the coefficient of heterozygosity and FST of four sites where the lizard *Sceloporus grammicus* was sampled, which were reclassified into three groups with the analysis of the genetic structure. Of these groups, two localities are located in forest areas and the other two in agricultural areas. Go to the **Sgrammicus_Selection** folder to work.
 
-1) Requited libraries
+1) Required libraries
 
 ```{r,results="hide"}
 library(vcfR)

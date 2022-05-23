@@ -2,8 +2,5 @@
 
 #Parameters used to run BayeScan
 
-#Parameters Forest sites
-#Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_For_Bayescan -o Analysis/BayeScan/Results/Sg_For/Sg_For_Bayescan_RE1 -threads 4 -n 5000 -thin 20 -nbp 20 -pilot 1000 -burn 10000
-
-#Parameters Agricultural sites
-#Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_Agr_Bayescan -o Analysis/BayeScan/Results/Sg_Agr/Sg_Agr_Bayescan_RE1 -threads 6 -n 5000 -thin 20 -nbp 20 -pilot 1000 -burn 10000
+#Parameters All sites
+Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_All_Bayescan -o Analysis/BayeScan/Results/Sg_All/Sg_All_Bayescan_RE1 -threads 4 -n 5000 -thin 20 -nbp 20 -pilot 1000 -burn 10000
