@@ -3,4 +3,10 @@
 #Parameters used to run BayeScan
 
 #Parameters All sites
-Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_All_Bayescan -o Analysis/BayeScan/Results/Sg_All/Sg_All_Bayescan_RE1 -threads 4 -n 5000 -thin 20 -nbp 20 -pilot 1000 -burn 10000
+Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_All_Bayescan -o Analysis/BayeScan/Results/Sg_All/Sg_All_Bayescan_RE1 -threads 4 -n 50000 -thin 20 -nbp 20 -pilot 10000 -burn 100000
+
+#Parameters P6 sites
+Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_P6_Bayescan -o Analysis/BayeScan/Results/Sg_P6/Sg_P6_Bayescan_RE1 -threads 4 -n 50000 -thin 20 -nbp 20 -pilot 10000 -burn 100000
+
+#Parameters P5 sites
+Analysis/BayeScan/Program/BayeScan2.1_macos64bits Data/BayeScan/Sg_P5_Bayescan -o Analysis/BayeScan/Results/Sg_P5/Sg_P6_Bayescan_RE1 -threads 4 -n 50000 -thin 20 -nbp 20 -pilot 10000 -burn 100000

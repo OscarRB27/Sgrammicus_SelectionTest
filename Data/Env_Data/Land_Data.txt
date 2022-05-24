@@ -1,0 +1,17 @@
+Sitios	Cobertura	%_Paisaje
+P5For	Bosque	0.763
+P5For	Suelo desnudo	0.019
+P5For	Caminos	0.002
+P5For	Agricultura	0.000
+P5Agr	Bosque	0.698
+P5Agr	Suelo desnudo	0.074
+P5Agr	Caminos	0.040
+P5Agr	Agricultura	0.348
+P6For	Bosque	0.941
+P6For	Suelo desnudo	0.047
+P6For	Caminos	0.013
+P6For	Agricultura	0.000
+P6Agr	Bosque	0.578
+P6Agr	Suelo desnudo	0.120
+P6Agr	Caminos	0.032
+P6Agr	Agricultura	0.089

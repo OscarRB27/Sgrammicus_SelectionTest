@@ -31,7 +31,7 @@ library(ggplot2)
 source("Analysis/BayeScan/Program/plot_R.r")
 ```
 
-4) Load BayeScan output
+4) Load BayeScan outputs
 
 ```{r}
 #Output of all sites
@@ -41,11 +41,27 @@ Sg.all<-read.table("Analysis/BayeScan/Results/Sg_All/Sg_All_Bayescan_RE1_fst.txt
                   col.names=c("bayescan_number","prob",
                               "log10(PO)","qval","alpha","fst")) #Put names to variables of file
 
+#Output of P6 sites
+Sg.P6<-read.table("Analysis/BayeScan/Results/Sg_P6/Sg_P6_Bayescan_RE1_fst.txt", #File path
+                  header=F, #Indicates that the variables in the file do not have names
+                  sep="", #Type of data separation
+                  col.names=c("bayescan_number","prob",
+                              "log10(PO)","qval","alpha","fst")) #Put names to variables of file
+
+#Output of P5 sites
+Sg.P5<-read.table("Analysis/BayeScan/Results/Sg_P5/Sg_P5_BayeScan_RE1_fst.txt",  #File path
+                  header=F, #Indicates that the variables in the file do not have names
+                  sep="", #Type of data separation
+                  col.names=c("bayescan_number","prob",
+                              "log10(PO)","qval","alpha","fst")) #Put names to variables of file
+
 #Loci info
 Sg.loci<-read.table("Data/Loci_Info/Loci_info.txt",sep="\t",header=T)
 ```
 
-5) Analysis and plotting of the output
+### All sites
+
+1) Analysis and plotting of the output of all sites
 
 ```{r}
 #All sites
@@ -57,7 +73,7 @@ Sg.all.res<-plot_bayescan(Sg.all, #Data
 Sg.all.res$nb_outliers #Very large number!
 ```
 
-6) False discovery rate correction
+2) False discovery rate correction
 
 ```{r}
 #All sites
@@ -77,7 +93,7 @@ Likelihood_Pval_A<-1-Eval_A
 Likelihood_FDR_A<-p.adjust(Likelihood_Pval_A,"BH") #Correction method used, known as False Discovery Rate
 ```
 
-7) Create a new data frame with the results that includes the original data and the adjusted p-values
+3) Create a new data frame with the results that includes the original data and the adjusted p-values
 
 ```{r}
 #All sites
@@ -96,7 +112,7 @@ head(Sg.All.res)
 write.table(Sg.outliers.bs,file="Analysis/BayeScan/Results/Sg_outliers/Sg.outliers.BS.txt",row.names=F,col.names=T,quote=F)
 ```
 
-8) Explore significant outliers with a plot
+4) Explore significant outliers with a plot
 
 ```{r}
 #All sites
@@ -117,5 +133,150 @@ Save plot to pdf file
 
 ```{r}
 ggsave("Analysis/BayeScan/Figures/Sg.All.out.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+### P6 Sites
+
+1) Analysis and plotting of the output of P6 Sites
+
+```{r}
+#Analysis of P6 sites using plot_bayescan function
+Sg.P6.res<-plot_bayescan(Sg.P6, #Data
+                          FDR=0.01) #False discovery rate
+
+#Review the number of outliers detected as candidates under selection
+Sg.P6.res$nb_outliers #Very large number!
+```
+
+2) False discovery rate correction
+
+```{r}
+#Estimate the empirical cumulative distribution function (ECDF) for output
+Likelihood_Function_P6<-ecdf(Sg.P6$alpha)
+head(Likelihood_Function_P6)
+#Function evaluation for output
+#Run function
+Eval_P6<-Likelihood_Function_F(Sg.P6[,"alpha"]) 
+#Check results
+head(Eval_P6)
+
+#Calculate the p-value, as 1 - the values of the previous results
+Likelihood_Pval_P6<-1-Eval_P6
+
+#Since many comparisons are made, it is necessary to correct the p-values, which make with the function p.adjust
+Likelihood_FDR_P6<-p.adjust(Likelihood_Pval_P6,"BH") #Correction method used, known as False Discovery Rate
+```
+
+3) Create a new data frame with the results that includes the original data and the adjusted p-values
+
+```{r}
+#Copy original data
+Sg.P6.res<-Sg.P6 
+
+#Add p-values
+Sg.P6.res$pval<-Likelihood_Pval_P6
+Sg.P6.res$pval.adjust<-Likelihood_FDR_P6
+head(Sg.P6.res)
+
+#Eexamine which ones are significant now
+sum(Sg.P6.res$pval.adjust<=0.001)
+```
+
+4) Explore significant outliers with a plot
+
+```{r}
+(Sg.P6.out<-ggplot(Sg.P6.res,aes(x=fst, y=alpha))+ #Axis definition
+                    geom_point(size=2,alpha=0.5, #Geometry definition
+                    aes(colour=pval.adjust<=0.001))+ #Points color adjusted to p-val.adjust
+                    scale_color_manual(values=c("black","red"))+ #Define point colors
+                    theme_bw()+ #Canvas definition
+                    ylab("Alpha")+ #y-lab name
+                    xlab("Fst")+ #x-lab name
+                    labs(color="Adjusted p-values")+ #Rename legend title
+                    ggtitle("P6 sites")+ #Put title
+                    theme(plot.title=element_text(hjust=0.5), #Center title
+                    axis.title.y=element_text(size=13), #y-axis title size
+                    axis.title.x=element_text(size=13))+ #x-axis title size
+                    annotate("text",x=0.742,y=0.09,label="L.6319",size=3)) #Add candidate SNP name
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/BayeScan/Figures/Sg.P6.out.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+### P5 Sites
+
+1) Analysis and plotting of the output of P5 Sites
+
+```{r}
+#Analysis of P5 sites using plot_bayescan function
+Sg.P5.res<-plot_bayescan(Sg.P5, #Data
+                          FDR=0.01) #False discovery rate
+
+#Review the number of outliers detected as candidates under selection
+Sg.P5.res$nb_outliers #Very large number!
+```
+
+2) False discovery rate correction
+
+```{r}
+#Estimate the empirical cumulative distribution function (ECDF) for output
+Likelihood_Function_P5<-ecdf(Sg.P5$alpha)
+
+#Function evaluation for output
+#Run function
+Eval_P5<-Likelihood_Function_P5(Sg.P5[,"alpha"]) 
+#Check results
+head(Eval_P5)
+
+#Calculate the p-value, as 1 - the values of the previous results
+Likelihood_Pval_P5<-1-Eval_P5
+
+#Since many comparisons are made, it is necessary to correct the p-values, which make with the function p.adjust
+Likelihood_FDR_P5<-p.adjust(Likelihood_Pval_P5,"BH") #Correction method used, known as False Discovery Rate
+```
+
+3) Create a new data frame with the results that includes the original data and the adjusted p-values
+
+```{r}
+#Copy original data
+Sg.P5.res<-Sg.P5
+
+#Add p-values
+Sg.P5.res$pval<-Likelihood_Pval_P5
+Sg.P5.res$pval.adjust<-Likelihood_FDR_P5
+head(Sg.P5.res)
+
+#Eexamine which ones are significant now
+sum(Sg.P5.res$pval.adjust<=0.001)
+```
+
+4) Explore significant outliers with a plot
+
+```{r}
+(Sg.P5.out<-ggplot(Sg.P5.res,aes(x=fst,y=alpha))+ #Axis definition
+                   geom_point(size=2,alpha=0.5, #Geometry definition
+                   aes(colour=pval.adjust<=0.001))+ #Points color adjusted to p-val.adjust
+                   scale_color_manual(values=c("black","red"))+ #Define point colors
+                   theme_bw()+ #Canvas definition
+                   ylab("Alpha")+ #y-lab name
+                   xlab("Fst")+ #x-lab name
+                   labs(color="Adjusted p-values")+ #Rename legend title
+                   ggtitle("P5 sites")+ #Put title
+                   theme(plot.title=element_text(hjust=0.5), #Center title
+                   axis.title.y=element_text(size=13), #y-axis title size
+                   axis.title.x=element_text(size=13))+ #x-axis title size
+                   annotate("text",x=0.31,y=0.198,label="L.1436",size=3)+ #Add candidate SNP name
+                   annotate("text",x=0.292,y=0.102,label="L.1437",size=3)) #Add candidate SNP name
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/BayeScan/Figures/Sg.P5.out.pdf",dpi=300,limitsize=TRUE,
        width=10,height=7)
 ```
