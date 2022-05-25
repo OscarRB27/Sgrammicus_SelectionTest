@@ -1,0 +1,69 @@
+---
+title: Detección de outliers entre dos tipos de paisajes que habita la lagartija *Sceloporus grammicus*
+author: "Óscar Romero Báez"
+date: '2022-05-25'
+output: html_document
+lang: es-Es
+---
+
+## Planteamiento del problema
+
+Los paisajes perturbados a gran escala debido a las actividades humanas, han generado grandes desafíos a la vida silvestre. Provocando que se enfrenten en mayor medida a entornos extremos y novedosos, que pueden ser factores de riesgo para su sobrevivencia (Campebell-Staton *et al*., 2020). Sin embargo, se ha visto que algunas especies que han entrado en contacto a estos entornos, muestran adaptaciones a variables que imponen estos paisajes (Salmon *et al*., 2021).
+
+Algunas adaptaciones están relacionadas con la tolerancia a niveles altos de ruido, luz artificial en las noches, aire contaminado y modificaciones en la dieta (Winchell *et al*., 2018). También hay adaptaciones asociadas al cambio conductual, morfológico y locomotor (Audet *et al*, 2016; Revel *et al*., 2016). Tales evidencias han permitido reconocer que existe divergencia adaptativa entre poblaciones naturales y perturbadas. Asimismo, de que tienen una base genética y que ocurren en escalas de tiempo cortas, principalmente en respuesta a las actividades humanas (Hendry *et al*., 2008; Reid *et al*., 2016; Campebell-Staton *et al*., 2020).
+
+Entender los mecanismos que generan la divergencia adaptativa podría proporcionar información relevante sobre la magnitud del cambio evolutivo inducido por la perturbación en las especies (Campebell-Staton *et al*., 2021; Salmon *et al*., 2021). Además, de indicar el potencial que tienen las especies para colonizar con éxito este tipo de paisajes y si este patrón se repite en diferentes sitios Campebell-Staton *et al*., 2020).
+
+
+
+
+
+
+
+Audet, J.-N., Ducatez, S. & Lefebvre, L. The town bird and the country bird:
+problem solving and immunocompetence vary with urbanization. Behav. Ecol.
+27, 637–644 (2016).
+
+Campbell-Staton, S. C. et al. Parallel selection on thermal physiology facilitates
+repeated adaptation of city lizards to urban heat islands. Nat. Ecol. Evol. 4,
+652–658 (2020).
+
+Reid, N. M. et al. The genomic landscape of rapid repeated evolutionary
+adaptation to toxic pollution in wild fish. Science 354, 1305–1308 (2016).
+
+Winchell, K. M., Reynolds, R. G., Prado‐Irwin, S. R., Puente‐Rolón, A. R. &
+Revell, L. J. Phenotypic shifts in urban areas in the tropical lizard Anolis
+cristatellus. Evolution 70, 1009–1022 (2016).
+
+Winchell, K. M., Maayan, I., Fredette, J. R. & Revell, L. J. Linking locomotor
+performance to morphological shifts in urban lizards. Proc. R. Soc. B Biol. Sci.
+285, 20180229 (2018).
+
+Hendry, A. P., Farrugia, T. J. & Kinnison, M. T. Human influences on rates of
+phenotypic change in wild animal populations. Mol. Ecol. 17, 20–29 (2008).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
