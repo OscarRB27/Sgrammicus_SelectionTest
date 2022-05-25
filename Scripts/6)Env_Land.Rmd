@@ -1,0 +1,555 @@
+---
+title: "Enviromental Analysis"
+author: "Óscar Romero Báez"
+date: '2022-05-23'
+output: html_document
+---
+
+### 1) Required libraries
+
+```{r}
+library(ggplot2)
+library(nortest)
+```
+
+
+### 2) Required database is loaded
+
+```{r}
+#Enviromental variables database
+Sg.env<-read.table("Data/Env_Data/Env_Data.txt",header=T)
+
+#Transform to factor some variables
+Sg.env$ID<-factor(Sg.env$ID)
+Sg.env$Site<-factor(Sg.env$Site)
+Sg.env$Polygon<-factor(Sg.env$Polygon)
+Sg.env$Site_ID<-factor(Sg.env$Site_ID)
+
+#Explore data
+str(Sg.env)
+summary(Sg.env)
+
+#Landscape cover database
+Sg.cov<-as.data.frame(read.table("Data/Env_Data/Cov_Data.txt",header=T))
+
+#Transform to factor some variables
+Sg.cov$Sites<-factor(Sg.cov$Sites)
+Sg.cov$Coverage<-factor(Sg.cov$Coverage,labels=c("Agriculture","Bare soil","Forest","Roads"))
+
+#Explore data
+str(Sg.cov)
+summary(Sg.env)
+```
+
+### 3) Proportion of land cover for each site within each polygon
+
+```{r}
+(Sg.lancov<-ggplot(data=Sg.cov, #Databas
+            aes(x=Sites,y=Prop_Cov,fill=Coverage))+ #Axis definition
+            geom_bar(stat="identity",color="black")+ #Geometry definition
+            facet_wrap(~Polygon,scale="free_x")+ #Split plots
+            ylab("Fraction of land cover")+ #y-axis legend
+            scale_fill_manual(values=c("aquamarine3","darkgoldenrod","darkslategray","azure4"))+ #Colors definition
+            theme_bw()+ #Canvas definition
+            labs(fill="Land cover")+ #Rename legend
+            scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+            theme(axis.title.x=element_blank(), #Remove title of x-axis
+            strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+            axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+            axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.lancov.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+### 4) Analysis of environmental variables between sites within each polygon
+
+#### Temperature soil (St)
+
+a) Plot of St between sites within the polygons
+
+```{r}
+#Plot with St between sites within polygons
+(Sg.St<-ggplot(data=Sg.env, #Database
+             aes(x=Site_ID,y=St))+ #Axis definition
+             geom_boxplot(aes(fill=Site))+ #Geometry definition
+             geom_jitter(aes(fill=Site),width=0.3)+ #Geometry definition
+             facet_wrap(~Polygon,scale="free_x")+ #Split plots
+             ylab("Soil temperature (°C)")+ #y-axis legend
+             scale_fill_brewer(palette="Dark2")+ #Colors definition
+             scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+             theme_bw()+ #Canvas definition
+             theme(legend.position="none",axis.title.x=element_blank(), #Remove title of x-axis
+             strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+             axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+             axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.St.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+b) Normality tests to determine if St has a normal distribution
+
+- All sites
+Normality test of St with all the data
+
+```{r}
+#Shapiro test used to n<50
+#shapiro.test(Sg.env$St)
+
+#Lillie test used to n>=50
+lillie.test(Sg.env$St)
+```
+
+St for all data non-normal
+
+```{r}
+#Filter by sites within of each polygon to pr
+#Only samples of P6For
+P6For<-filter(Sg.env,Site_ID=="P6For")
+shapiro.test(P6For$St) #(n<50) 
+lillie.test(P6For$St) #(n>=50)
+#St for P6For non-normal
+
+#Only samples of P6Agr
+P6Agr<-filter(Sg.env,Site_ID=="P6Agr")
+shapiro.test(P6For$St) #(n<50) 
+lillie.test(P6For$St) #(n>=50)
+#St for P6Agr non-normal
+
+#Only samples of P5For
+P5For<-filter(Sg.env,Site_ID=="P5For")
+shapiro.test(P5For$St) #(n<50) 
+lillie.test(P5For$St) #(n>=50)
+#St for P5For non-normal
+
+#Only samples of P6Agr
+P5Agr<-filter(Sg.env,Site_ID=="P5Agr")
+shapiro.test(P5For$St) #(n<50) 
+lillie.test(P5For$St) #(n>=50)
+#St for P5Agr non-normal
+```
+
+```{r}
+#Extract samples of Polygon 6 to do Wilcox test
+P6<-filter(Sg.env,Polygon=="P6")
+
+
+#Wilcox test to estimate if there are significant differences
+wilcox.test(data=P6,St~Site,exact=F) #No significant differences
+
+#Extract samples of Polygon 5 to do Wilcox test
+P5<-filter(Sg.env,Polygon=="P5")
+
+#Wilcox test to estimate if there are significant differences
+wilcox.test(data=P5,St~Site,exact=F) #No significant differences
+```
+
+```{r}
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=At))+ #Axis definition
+            geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+```{r}
+shapiro.test(Sg.env$At) #(n<50)
+lillie.test(Sg.env$At) #(n>=50)
+
+ggplot(Sg.env,aes(x=At,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+#Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$At) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$At) #(n>=50)
+
+ggplot(Agr,aes(x=At,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#For<-filter(Sg.env,Site=="For")
+shapiro.test(For$At) #(n<50) 
+lillie.test(For$At) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=At,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,At~Site,exact=F) #si hay diferencias significativas
+```
+
+```{r}
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=RH))+ #Axis definition
+            geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+```{r}
+shapiro.test(Sg.env$RH) #(n<50)
+lillie.test(Sg.env$RH) #(n>=50)
+
+ggplot(Sg.env,aes(x=RH,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+#Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$RH) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$RH) #(n>=50)
+
+ggplot(Agr,aes(x=RH,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#For<-filter(Sg.env,Site=="For")
+shapiro.test(For$RH) #(n<50) 
+lillie.test(For$RH) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=RH,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,RH~Site,exact=F) #si hay diferencias significativas
+```
+
+```{r}
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=Slope))+ #Axis definition
+            geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+```{r}
+shapiro.test(Sg.env$Slope) #(n<50)
+lillie.test(Sg.env$Slope) #(n>=50)
+
+ggplot(Sg.env,aes(x=Slope,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+#Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$Slope) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$Slope) #(n>=50)
+
+ggplot(Agr,aes(x=Slope,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#For<-filter(Sg.env,Site=="For")
+shapiro.test(For$Slope) #(n<50) 
+lillie.test(For$Slope) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=Slope,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,Slope~Site,exact=F) #si hay diferencias significativas
+```
+
+```{r}
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=MSI))+ #Axis definition
+            geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+```{r}
+shapiro.test(Sg.env$MSI) #(n<50)
+lillie.test(Sg.env$MSI) #(n>=50)
+
+ggplot(Sg.env,aes(x=MSI,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+#Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$MSI) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$MSI) #(n>=50)
+
+ggplot(Agr,aes(x=MSI,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#For<-filter(Sg.env,Site=="For")
+shapiro.test(For$MSI) #(n<50) 
+lillie.test(For$MSI) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=MSI,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,MSI~Site,exact=F) #no hay diferencias significativas
+```
+
+```{r}
+
+
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=DEM))+ #Axis definition
+            #geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+
+```{r}
+shapiro.test(Sg.env$DEM) #(n<50)
+lillie.test(Sg.env$DEM) #(n>=50)
+
+ggplot(Sg.env,aes(x=DEM,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+#Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$DEM) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$DEM) #(n>=50)
+
+ggplot(Agr,aes(x=DEM,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#For<-filter(Sg.env,Site=="For")
+shapiro.test(For$DEM) #(n<50) 
+lillie.test(For$DEM) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=DEM,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,DEM~Site,exact=F) #si hay diferencias significativas
+```
+
+```{r}
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=NDVI))+ #Axis definition
+            geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+```{r}
+shapiro.test(Sg.env$NDVI) #(n<50)
+lillie.test(Sg.env$NDVI) #(n>=50)
+
+ggplot(Sg.env,aes(x=NDVI,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+#Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$NDVI) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$NDVI) #(n>=50)
+
+ggplot(Agr,aes(x=NDVI,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#For<-filter(Sg.env,Site=="For")
+shapiro.test(For$NDVI) #(n<50) 
+lillie.test(For$NDVI) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=NDVI,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,NDVI~Site,exact=F) #si hay diferencias significativas
+```
+
+```{r}
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=Aspect))+ #Axis definition
+            geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+```{r}
+shapiro.test(Sg.env$Aspect) #(n<50)
+lillie.test(Sg.env$Aspect) #(n>=50)
+
+ggplot(Sg.env,aes(x=Aspect,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+#Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$Aspect) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$Aspect) #(n>=50)
+
+ggplot(Agr,aes(x=Aspect,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#For<-filter(Sg.env,Site=="For")
+shapiro.test(For$Aspect) #(n<50) 
+lillie.test(For$Aspect) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=Aspect,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,Aspect~Site,exact=F) #ni hay diferencias significativas
+```
+
+```{r}
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=Bt))+ #Axis definition
+            geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+```{r}
+shapiro.test(Sg.env$Bt) #(n<50)
+lillie.test(Sg.env$Bt) #(n>=50)
+
+ggplot(Sg.env,aes(x=Bt,y=..density..))+
+       geom_histogram(binwidth=0.5,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$Bt) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$Bt) #(n>=50)
+
+ggplot(Agr,aes(x=Bt,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+For<-filter(Sg.env,Site=="For")
+shapiro.test(For$Bt) #(n<50) 
+lillie.test(For$Bt) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=Bt,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,Bt~Site,exact=F) #no hay diferencias significativas
+
+t.test(data=Sg.env,Bt~Site)
+```
+
+```{r}
+ggplot(data=Sg.env, #Databas
+            aes(x=Site,y=Soil))+ #Axis definition
+            geom_boxplot(aes(colour=Site))+
+            geom_jitter(aes(colour=Site))+
+            #facet_wrap(~Site,scale="free_x")+
+            theme_bw()+
+            theme(legend.position=)
+```
+
+```{r}
+
+shapiro.test(Sg.env$Soil) #(n<50)
+lillie.test(Sg.env$Soil) #(n>=50)
+
+ggplot(Sg.env,aes(x=Soil,y=..density..))+
+       geom_histogram(binwidth=0.5,col='black',fill='orange')+
+       theme_bw()
+
+#filtrar por sitio
+#Agr<-filter(Sg.env,Site=="Agr")
+shapiro.test(Agr$Soil) #(n<50) Agr tiene 48 muestras
+lillie.test(Agr$Soil) #(n>=50)
+
+ggplot(Agr,aes(x=Soil,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+
+#For<-filter(Sg.env,Site=="For")
+shapiro.test(For$Soil) #(n<50) 
+lillie.test(For$Soil) #(n>=50) For tiene 61 muestras
+
+ggplot(For,aes(x=Soil,y=..density..))+
+       geom_histogram(binwidth=1,col='black',fill='orange')+
+       theme_bw()
+```
+
+```{r}
+wilcox.test(data=Sg.env,Soil~Site,exact=F) #No hay diferencias significativas
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

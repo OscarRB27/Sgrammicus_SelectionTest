@@ -22,20 +22,36 @@ Analysis/BayPass/Program/g_baypass -npop 4 -gfile Analysis/BayPass/Results/G.bta
 
 20 pilot runs of length 1,000, followed by a main run of length 500,000 with a burnin of 5,000 and a thinning interval of 25
 
-
 P6
 
 ##Primero vamos a obtener la matriz de covarianza
 
-Analysis/BayPass/Program/g_baypass -npop 4 -gfile Data/BayPass/Input_Loci/SN_baypass_P6.input -efile Data/BayPass/Input_Vars/Env_P6.txt -outprefix Analysis/BayPass/Results/BP_P6/covis -nval 20000 -thin 25 -burnin 2000 -npilot 20 -pilotlength 1000 -nthreads 4
+Analysis/BayPass/Program/g_baypass -npop 2 -gfile Data/BayPass/Input_Loci/SN_baypass_P6.input -efile Data/BayPass/Input_Vars/Env_P6.txt -outprefix Analysis/BayPass/Results/BP_P6/covis -nval 20000 -thin 25 -burnin 2000 -npilot 20 -pilotlength 1000 -nthreads 6
 
 ###Ahora toca el análisis de asociación usando el modelo AUX (auxiliar model)
 ##checa que usamos la matriz de salida "covis_mat_omega.out" obtenida en el paso anterior
 
-Analysis/BayPass/Program/g_baypass -npop 4 -gfile Data/BayPass/Input_Loci/SN_baypass_all.input -omegafile Analysis/BayPass/Results/covis_mat_omega.out -efile Data/BayPass/Input_Vars/Env_All.txt -outprefix Analysis/BayPass/Results/SN_covaux  -nval 1000 -thin 25 -burnin 500 -npilot 10 -pilotlength 500 -auxmodel -nthreads 6
+Analysis/BayPass/Program/g_baypass -npop 2 -gfile Data/BayPass/Input_Loci/SN_baypass_P6.input -omegafile Analysis/BayPass/Results/BP_P6/covis_mat_omega.out -efile Data/BayPass/Input_Vars/Env_P6.txt -outprefix Analysis/BayPass/Results/BP_P6/SN_covaux -nval 20000 -thin 25 -burnin 2000 -npilot 20 -pilotlength 1000 -auxmodel -nthreads 6
 
 ###Regresamos a la consola y anlizamos las simulaciones con los mismos settings
 
-Analysis/BayPass/Program/g_baypass -npop 4 -gfile Analysis/BayPass/Results/G.btapods -outprefix Analysis/BayPass/Results/anapod -nval 1000 -thin 25 -burnin 500 -npilot 10 -pilotlength 500 -nthreads 1 -seed 85934 -nthreads 4
+Analysis/BayPass/Program/g_baypass -npop 2 -gfile Analysis/BayPass/Results/BP_P6/G.btapods -outprefix Analysis/BayPass/Results/BP_P6/anapod -nval 20000 -thin 25 -burnin 2000 -npilot 20 -pilotlength 1000 -seed 85934 -nthreads 6
+
+P5
+
+##Primero vamos a obtener la matriz de covarianza
+
+Analysis/BayPass/Program/g_baypass -npop 2 -gfile Data/BayPass/Input_Loci/SN_baypass_P5.input -efile Data/BayPass/Input_Vars/Env_P5.txt -outprefix Analysis/BayPass/Results/BP_P5/covis -nval 20000 -thin 25 -burnin 2000 -npilot 20 -pilotlength 1000 -nthreads 6
+
+###Ahora toca el análisis de asociación usando el modelo AUX (auxiliar model)
+##checa que usamos la matriz de salida "covis_mat_omega.out" obtenida en el paso anterior
+
+Analysis/BayPass/Program/g_baypass -npop 2 -gfile Data/BayPass/Input_Loci/SN_baypass_P5.input -omegafile Analysis/BayPass/Results/BP_P5/covis_mat_omega.out -efile Data/BayPass/Input_Vars/Env_P5.txt -outprefix Analysis/BayPass/Results/BP_P5/SN_covaux -nval 20000 -thin 25 -burnin 2000 -npilot 20 -pilotlength 1000 -auxmodel -nthreads 6
+
+###Regresamos a la consola y anlizamos las simulaciones con los mismos settings
+
+Analysis/BayPass/Program/g_baypass -npop 2 -gfile Analysis/BayPass/Results/BP_P5/G.btapods -outprefix Analysis/BayPass/Results/BP_P5/anapod -nval 20000 -thin 25 -burnin 2000 -npilot 20 -pilotlength 1000 -seed 85934 -nthreads 6
+
+
 
 
