@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="es-Es" xml:lang="es-Es">
+<html>
 
 <head>
 
@@ -11,9 +11,9 @@
 
 <meta name="author" content="Óscar Romero Báez" />
 
-<meta name="date" content="2022-05-25" />
+<meta name="date" content="2022-05-26" />
 
-<title>Detección de outliers entre dos tipos de paisajes que habita la lagartija Sceloporus grammicus</title>
+<title>Detección de SNPs outliers entre dos tipos de paisajes que habita la lagartija Sceloporus grammicus</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -363,10 +363,10 @@ pre code {
 
 
 
-<h1 class="title toc-ignore">Detección de outliers entre dos tipos de
-paisajes que habita la lagartija <em>Sceloporus grammicus</em></h1>
+<h1 class="title toc-ignore">Detección de SNPs outliers entre dos tipos
+de paisajes que habita la lagartija <em>Sceloporus grammicus</em></h1>
 <h4 class="author">Óscar Romero Báez</h4>
-<h4 class="date">2022-05-25</h4>
+<h4 class="date">2022-05-26</h4>
 
 </div>
 
@@ -376,27 +376,138 @@ paisajes que habita la lagartija <em>Sceloporus grammicus</em></h1>
 <p>Los paisajes perturbados a gran escala debido a las actividades
 humanas, han generado grandes desafíos a la vida silvestre. Provocando
 que se enfrenten en mayor medida a entornos extremos y novedosos, que
-pueden ser factores de riesgo para su sobrevivencia (Campebell-Staton
+pueden ponerlos en riesgo al afectar su sobrevivencia (Campebell-Staton
 <em>et al</em>., 2020). Sin embargo, se ha visto que algunas especies
 que han entrado en contacto a estos entornos, muestran adaptaciones a
 variables que imponen estos paisajes (Salmon <em>et al</em>., 2021).</p>
 <p>Algunas adaptaciones están relacionadas con la tolerancia a niveles
-altos de ruido, luz artificial en las noches, aire contaminado y
+altos de ruido, luz artificial en las noches, temperaturas altas y
 modificaciones en la dieta (Winchell <em>et al</em>., 2018). También hay
 adaptaciones asociadas al cambio conductual, morfológico y locomotor
 (Audet <em>et al</em>, 2016; Revel <em>et al</em>., 2016). Tales
-evidencias han permitido reconocer que existe divergencia adaptativa
-entre poblaciones naturales y perturbadas. Asimismo, de que tienen una
-base genética y que ocurren en escalas de tiempo cortas, principalmente
-en respuesta a las actividades humanas (Hendry <em>et al</em>., 2008;
-Reid <em>et al</em>., 2016; Campebell-Staton <em>et al</em>., 2020).</p>
+evidencias han permitido identificar la existencia de divergencia
+adaptativa entre poblaciones naturales y perturbadas. Asimismo, de que
+tiene una base genética y que ocurre en escalas de tiempo cortas,
+principalmente en respuesta a las actividades humanas (Hendry <em>et
+al</em>., 2008; Reid <em>et al</em>., 2016; Campebell-Staton <em>et
+al</em>., 2020).</p>
 <p>Entender los mecanismos que generan la divergencia adaptativa podría
 proporcionar información relevante sobre la magnitud del cambio
-evolutivo inducido por la perturbación en las especies (Campebell-Staton
-<em>et al</em>., 2021; Salmon <em>et al</em>., 2021). Además, de indicar
-el potencial que tienen las especies para colonizar con éxito este tipo
-de paisajes y si este patrón se repite en diferentes sitios
-Campebell-Staton <em>et al</em>., 2020).</p>
+evolutivo inducido por los paisajes perturbados en las especies (Salmon
+<em>et al</em>., 2021). Además, de indicar el potencial que tienen para
+colonizar con éxito este tipo de paisajes y si este patrón se repite en
+diferentes sitios Campebell-Staton <em>et al</em>., 2020).</p>
+</div>
+<div id="preguntas" class="section level2">
+<h2>Preguntas</h2>
+<p>Una especie que puede habitar en paisajes naturales y perturbados, es
+la lagartija <em>Sceloporus grammicus</em>. En la cual se han observado
+modificaciones en su conducta, patrones reproductivos, de coloración y
+morfológicos cuando habitan sitios perturbados (Argaez-Márquez, 2015).
+Por tales razones, es un buen modelo para investigar si existen
+diferentes SNPs outliers, candidatos bajo selección, que puedan llevar a
+una divergencia adaptativa en <em>S. grammicus</em>, esto al comparar
+paisajes naturales y perturbados. Además, de saber si algún SNPs se
+encuentran asociados a alguna variable ambiental y si este patrón se
+repite en los distintos sitios analizados.</p>
+</div>
+<div id="métodos" class="section level2">
+<h2>Métodos</h2>
+<div id="trabajo-de-campo" class="section level3">
+<h3>Trabajo de campo</h3>
+<p>El estudio fue realizado en cuatro sitios, dos perturbados (P6Agr y
+P5Agr) y dos naturales (P6For y P5For, ubicados en dos localidades
+distintas. Uno a las faldas del Volcán Iztaccíhuatl (P6) y el otro en el
+Monte Tlaloc (P5). Los individuos de <em>S. grammicus</em> capturados se
+les tomó la coordenada geográfica y una pequeña muestra de tejido de la
+cola, para su posterior procesamiento en el laboratorio. En cada sitio
+de captura se registraron variables abióticas del paisaje, tal como
+temperatura del aire y del suelo, humedad relativa y altura. También se
+registró datos de presencia o ausencia de caminos, cultivos,
+asentamientos y tipo de vegetación.</p>
+</div>
+<div id="análisis-del-paisaje" class="section level3">
+<h3>Análisis del paisaje</h3>
+<p>Para analizar las diferencias de los paisajes perturbados y
+naturales, se prosiguió a realizar diversos análisis con las variables
+tomadas en campo. Los datos de presencia se usaron para realizar un
+análisis de clasificación supervisada de uso de suelos, usando el
+programa QGIS v.3.22, el cual fue usado posteriormente en el programa
+Fragstat v.4.2 para estimar el área de cada tipo de parche. Asimismo,
+con los datos de altura se prosiguió a calcular la pendiente del
+terreno. Usando imágenes satelitales Sentinel 2, se calculó el Índice de
+vegetación normalizada (NDVI) y el Índice de estrés por humedad (MSI).
+Todos estos análisis se realizaron usando el programa QGIS v.3.22.
+Finalmente, en r para cada variable se realizaron pruebas de Wilcoxon
+para evaluar si existían diferencias significativas entre sitios dentro
+de cada localidad.</p>
+</div>
+<div id="análisis-genómicos" class="section level3">
+<h3>Análisis genómicos</h3>
+<p>De cada sitio de estudio se utilizaron 10 individuos, de los cuales
+su ADN fue extraído y secuenciado mediante ddrad-seq, usando un
+secuenciador Illumuna Hiseq 2000. Los datos genómicos brutos fueron
+filtrados y ensamblados <em>de novo</em> previamente, usando programas
+como Trimmomatic v,0.36, Stacks v.2.60 y VCFtool v.0.1.16. Finalmente,
+se obtuvo una base de datos con 7599 SNPs, con la que se realizó los
+análisis para detectar loci candidatos bajo selección.</p>
+<p>Para la detección del número de clusters más probable entre sitios,
+se usó la función <code>find clusters</code> y un análisis discriminante
+de componente principales (DAPC), empleando el paquete adegenet v.2.1.5.
+Después se prosiguió a estimar la diversidad genética de cada grupo con
+el mismo paquete y el coeficiente de diferenciación FST usando el
+paquete hierfstat v.0.5-11.</p>
+<p>La detección de outliers se hizo usando dos programas diferentes,
+BayeScan v.2.01 y BayPass v2.3. El primero identifica loci candidatos
+bajo selección en datos genéticos, usando diferencias en las frecuencias
+alélicas entre un acervo genético común, por lo que emplea el
+coeficiente FST para ello. El segundo Identifica marcadores genéticos
+sujetos a selección asociados a covariables específicas de una
+población, tal como variables ambientales o características fenotípicas
+cuantitativas o categóricas. Cabe mencionar que, los análisis se
+hicieron entre sitios dentro de cada localidad y las variables ábioticas
+obtenidas y generadas fueron estandarizadas para el análisis con
+BayPass.</p>
+</div>
+</div>
+<div id="resultados" class="section level2">
+<h2>Resultados</h2>
+<div id="análisis-del-paisaje-1" class="section level3">
+<h3>Análisis del paisaje</h3>
+<p>En cuanto al área ocupada para cada parche se observó que, dentro de
+las áreas naturales, el que predominó fue el bosque de coníferas, y
+estos no presentaron zonas agrícolas. Con especto a las zonas
+perturbadas, igualmente hubo predomino del bosque, pero hubo una mayor
+proporción de área ocupa por zonas agrícolas y de suelo desnudo, además
+de mayor presencia de caminos. En cuanto a las pruebas Wilcoxon, la
+humedad relativa, pendiente, altura y el índice de estrés por humedad,
+presentaron diferencias significativas entre sitios dentro de cada
+localidad.</p>
+</div>
+<div id="análisis-genómico" class="section level3">
+<h3>Análisis genómico</h3>
+<p>El análisis con <code>find clusters</code> y DAPC mostró que el
+número de clusters más probable fue de cuatro, separando a los
+individuos según su sitio de muestreo. En cuanto a los valores de
+diversidad, el sitio perturbado P5Agr fue el que mostró una mayor
+heterocigosidad con respecto a los otros tres sitios. Mientras que el
+sitio P5For mostró los menores valores. Con respecto al coeficiente FST
+los valores más altos de diferenciación los presentó el sitio P6For, el
+cual estaba claramente separado de los otros tres según el DAPC. Entre
+los otros tres sitios su diferenciación fue moderada.</p>
+<p>El análisis con BayeScan para detectar SNPs outliers encontró en cada
+par de sitios un solo SNP candidato bajo selección, el cual fue distinto
+entre localidades. En cuanto al análisis con BayPass para la localidad
+P6 se encontraron 19 SNPs asociados a una variable ambiental, siendo la
+humedad relativa, la altura y la pendiente los que tuvieron una mayor
+asociación con correlaciones postivas. Para el sitio P5 solo se
+encontraron dos, que tuvieron una mayor asociación con las variables
+altura y NDVI, mostrando una correlación positiva y con la pendiente,
+pero con una correlación negativa.</p>
+</div>
+</div>
+<div id="referencias" class="section level2">
+<h2>Referencias</h2>
 <p>Audet, J.-N., Ducatez, S. &amp; Lefebvre, L. The town bird and the
 country bird: problem solving and immunocompetence vary with
 urbanization. Behav. Ecol. 27, 637–644 (2016).</p>
