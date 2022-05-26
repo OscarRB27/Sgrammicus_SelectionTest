@@ -12,11 +12,11 @@ The division that follows the repository is as follows: five main folders called
 
 - **Report** folder, which contains a .txt file indicating the link to this repository. It also contains the memory and presentation of this work.
 
--**Script** folder, which contains all the scripts made to execute the different analyses. These are numbered and have code names according to the analysis for which they were made. These files are in two formats .Rmd and .html.
+- **Script** folder, which contains all the scripts made to execute the different analyses. These are numbered and have code names according to the analysis for which they were made. These files are in two formats .Rmd and .html.
 
 Finally, this README is at the same level as the five main folders and contains all the information about the organization of this repository.
 
-Postscript:
+**Postscript**:
 
 I hope that this new publication will be useful for the future and that it will alleviate the frustration of performing genomic analyses, which are often a headache.
 
