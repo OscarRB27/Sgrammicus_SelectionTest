@@ -1,0 +1,183 @@
+---
+title: "Heterozygosity and FST"
+author: "Óscar Romero Báez"
+date: "5/11/2022"
+output: html_document
+---
+
+This script is used to calculate the coefficient of heterozygosity and FST of four sites where the lizard *Sceloporus grammicus* was sampled, which were reclassified into three groups with the analysis of the genetic structure. Of these groups, two localities are located in forest areas and the other two in agricultural areas. Go to the **Sgrammicus_Selection** folder to work.
+
+1) Required libraries
+
+```{r,results="hide"}
+library(vcfR)
+library(adegenet)
+library(hierfstat)
+library(fsthet)
+library(ggplot2)
+library(ggcorrplot)
+library(patchwork)
+```
+
+2) Load the necessary databases
+
+```{r}
+#ID and location database information
+Sg.data<-read.table("Data/Pop_Info/Pops.txt",sep="\t",header=T)
+
+#SNPs database
+Sg.vcf<-read.vcfR("Data/Raw_Data/Sg_Pols2M_7000snps.vcf")
+#Transform SNPs database to genind object
+Sg.gen<-vcfR2genind(Sg.vcf)
+#Definition of localities as populations
+pop(Sg.gen)<-Sg.data$loc
+
+##Transform genind object to fstast
+Sg.fstat<-genind2hierfstat(Sg.gen)
+```
+
+3) Obtain summary genetic statistics
+
+```{r,results='hide'}
+#Genetic statistics
+Sg.basic.ss<-basic.stats(Sg.gen)
+#Global statistics
+Sg.basic.ss$overall
+```
+
+## Genetic diversity
+
+1) Obtain only the observed heterozygosity values by group (K)
+
+```{r,results='hide'}
+#Obtain the observed heterozygosity
+Sg.Ho<-Sg.basic.ss$Ho
+
+#Imputation of NAs of the base of Ho by groups
+Sg.Ho<-apply(Sg.Ho,2,function(x)replace(x, is.na(x),
+as.numeric(names(which.max(table(x))))))
+
+#Calculation of the average of Ho for each group
+Ho<-apply(Sg.Ho,MARGIN=2,FUN=mean) %>% round(digits=4)
+```
+
+2) Obtain only the expected heterozygosity values per group (K)
+
+```{r,results='hide'}
+#Obtain the expected heterozygosity
+Sg.Hs<-Sg.basic.ss$Hs
+
+#Imputation of NAs of the base of Ho by groups
+Sg.Hs<-apply(Sg.Hs,2,function(x)replace(x, is.na(x),
+as.numeric(names(which.max(table(x))))))
+
+#Calculation of the average of Ho for each group
+Hs<-apply(Sg.Hs,MARGI =2,FUN=mean) %>% round(digits=4)
+```
+
+3) Combination of Ho and Hs in a table and transformation to data frame
+
+```{r}
+#Join the data of Ho and Hs 
+Sg.het<-cbind(Ho,Hs)
+#Transform to data frame
+Sg.het<-as.data.frame(Sg.het)
+#Create new variable
+Sites<-as.factor(c("P5For","P5Agr","P6For","P6Agr"))
+#Join the new variable to the data base
+(Sg.het<-cbind(Sg.het,Sites))
+```
+
+4) Heterozygosity plots
+
+```{r}
+Sg.Ho.plot<-ggplot(Sg.het,aes(x=Sites,y=Ho,fill=Sites))+ #Axis definition
+  geom_bar(stat="identity",width=0.7,color="black")+ #Geometry definition
+  scale_fill_brewer(palette="Dark2")+ #Color palette
+  theme_bw()+ #Canvas definition
+  ylab("Observed heterozygosity")+ #Lab name
+  theme(axis.title.x=element_blank(), #Remove x-axis title
+        axis.text.x=element_text(size=12,color="black"), #x-axis text size
+        axis.text.y=element_text(size=9), #y-axis text size
+        axis.title.y = element_text(size=12), #y-axis title size
+        legend.position="none") #Remove legend
+
+Sg.Hs.plot<-ggplot(Sg.het,aes(x=Sites,y=Hs,fill=Sites))+ #Axis definition
+  geom_bar(stat="identity",width=0.7,color="black")+ #Geometry definition
+  scale_fill_brewer(palette="Dark2")+ #Color palette
+  theme_bw()+ #Canvas definition
+  ylab("Expected heterozygosity")+ #Lab name
+  theme(axis.title.x=element_blank(), #Remove x-axis title
+        axis.text.x=element_text(size=12,color="black"), #x-axis text size
+        axis.text.y=element_text(size=9), #y-axis text size
+        axis.title.y = element_text(size=12), #y-axis title size
+        legend.position="none") #Remove legend
+
+(Sg.het.plot<-Sg.Ho.plot+Sg.Hs.plot) #Join graphs
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Het_Fst/Figures/Sg.het.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+## FST coefficient
+
+1) Paired FST coefficient calculation
+
+```{r}
+#Estimates pairwise FSTs according to Nei
+(Sg.Nfst<-pairwise.neifst(Sg.fstat))
+```
+
+```{r}
+#Estimates pairwise FSTs according to Weir and Cockerham
+(Sg.WCfst<-pairwise.WCfst(Sg.fstat))
+```
+
+2) Plot of the FST coefficients
+
+```{r}
+#FST plot (Nei)
+Sg.fst.plot<-ggcorrplot(Sg.Nfst, #Pairwise Neifst
+           hc.order=TRUE, #Correlation matrix
+           type="lower", #Data Representation
+           outline.col="black", #Line color
+           lab=TRUE, #Show values of FST
+           show.legend=TRUE, #Show legend
+           title="Nei Fst", #Title
+           tl.cex=10, #Axis text size
+           tl.srt=45, #Axis text angle
+           ggtheme = ggplot2::theme_bw)+ #Canvas definition
+           scale_fill_gradient2(low="white",high="red", #Choose the color from the color legend values
+                                breaks=c(0,0.25,0.50,0.75,1), #Define legend values
+                                limit=c(0, 1))+ #Define the limits of the legend values
+           labs(fill="Fst") #Change the title of the legend values
+
+#FST plot (W&Q)
+Sg.wc.plot<-ggcorrplot(Sg.WCfst ,#Pairwise WCfst
+           hc.order=TRUE, #Correlation matrix
+           type="lower", #Data Representation
+           outline.col="black", #Line color
+           lab=TRUE, #Show values of FST
+           show.legend=TRUE, #Show legend
+           title="W&C Fst", #Title
+           tl.cex=10, #Axis text size
+           tl.srt=45, #Axis text angle
+           ggtheme = ggplot2::theme_bw)+ #Canvas definition
+           scale_fill_gradient2(low="white",high="red",  #Choose the color from the color legend values
+                                breaks=c(0,0.25,0.50,0.75,1), #Define legend values
+                                limit=c(0, 1))+ #Define the limits of the legend values
+           labs(fill="Fst") #Change the title of the legend values
+
+(Sg.FST.plot<-(Sg.fst.plot+Sg.wc.plot)) #Join graphs
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Het_Fst/Figures/Sg.FST.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```

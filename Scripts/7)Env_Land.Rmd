@@ -1,0 +1,864 @@
+---
+title: "Enviromental Analysis"
+author: "Óscar Romero Báez"
+date: '2022-05-23'
+output: html_document
+---
+
+This script is used for ploting environmental variables. Also to carry out normality tests to test if they follow a normal distribution, which was necessary to know in order to apply the correct test (parametric or non-parametric) to know if there were significant differences between the variables in the different sites within each locality.
+
+### 1) Required libraries
+
+```{r}
+library(ggplot2)
+library(nortest)
+library(dplyr)
+```
+
+
+### 2) Required database is loaded
+
+```{r}
+#Enviromental variables databases
+Sg.env<-read.table("Data/Env_Data/Env_Data.txt",header=T)
+
+#Transform to factor some variables
+Sg.env$ID<-factor(Sg.env$ID)
+Sg.env$Site<-factor(Sg.env$Site)
+Sg.env$Polygon<-factor(Sg.env$Polygon)
+Sg.env$Site_ID<-factor(Sg.env$Site_ID)
+
+#Explore data
+str(Sg.env)
+summary(Sg.env)
+
+#Polygon bases
+P6<-read.table("Data/Env_Data/P6.txt",header=T)
+P5<-read.table("Data/Env_Data/P5.txt",header=T)
+
+#Sites base by polygon
+P6For<-read.table("Data/Env_Data/P6For.txt",header=T)
+P6Agr<-read.table("Data/Env_Data/P6Agr.txt",header=T)
+P5For<-read.table("Data/Env_Data/P5For.txt",header=T)
+P5Agr<-read.table("Data/Env_Data/P5Agr.txt",header=T)
+
+#Landscape cover database
+Sg.cov<-as.data.frame(read.table("Data/Env_Data/Cov_Data.txt",header=T))
+
+#Transform to factor some variables
+Sg.cov$Sites<-factor(Sg.cov$Sites)
+Sg.cov$Coverage<-factor(Sg.cov$Coverage,labels=c("Agriculture","Bare soil","Forest","Roads"))
+
+#Explore data
+str(Sg.cov)
+summary(Sg.env)
+```
+
+### 3) Proportion of land cover for each site within each polygon
+
+```{r}
+(Sg.lancov<-ggplot(data=Sg.cov, #Database
+            aes(x=Sites,y=Prop_Cov,fill=Coverage))+ #Axis definition
+            geom_bar(stat="identity",color="black")+ #Geometry definition
+            facet_wrap(~Polygon,scale="free_x")+ #Split plots
+            ylab("Fraction of land cover")+ #y-axis legend
+            scale_fill_manual(values=c("aquamarine3","darkgoldenrod","darkslategray","azure4"))+ #Colors definition
+            theme_bw()+ #Canvas definition
+            labs(fill="Land cover")+ #Rename legend
+            scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+            theme(axis.title.x=element_blank(), #Remove title of x-axis
+            strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+            axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+            axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.lancov.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+### 4) Analysis of variables between sites within each polygon
+
+#### Soil temperature (St)
+
+a) Plot of St between sites within the polygons
+
+```{r}
+#Plot with St between sites within polygons
+(Sg.St.plot<-ggplot(data=Sg.env, #Database
+             aes(x=Site_ID,y=St))+ #Axis definition
+             geom_boxplot(aes(fill=Site))+ #Geometry definition
+             geom_jitter(aes(fill=Site),width=0.3)+ #Geometry definition
+             facet_wrap(~Polygon,scale="free_x")+ #Split plots
+             ylab("Soil temperature (°C)")+ #y-axis legend
+             scale_fill_brewer(palette="Dark2")+ #Colors definition
+             scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+             theme_bw()+ #Canvas definition
+             theme(legend.position="none",axis.title.x=element_blank(), #Remove title of x-axis
+             strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+             axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+             axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.St.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+b) Normality tests to determine if St has a normal distribution
+
+- All sites
+
+Normality test of St with all the data
+
+```{r}
+#Shapiro test used to n<50
+#shapiro.test(Sg.env$St)
+
+#Lillie test used to n>=50
+lillie.test(Sg.env$St)
+#St for all data, non-normal
+```
+
+- By sites
+
+Normality test for St within each site
+
+P6For site
+
+```{r}
+shapiro.test(P6For$St) #(n<50) 
+#lillie.test(P6For$St) #(n>=50)
+#St for P6For, non-normal
+```
+
+P6Agr site
+
+```{r}
+shapiro.test(P6Agr$St) #(n<50) 
+#lillie.test(P6Agr$St) #(n>=50)
+#St for P6Agr, non-normal
+```
+
+P5For site
+
+```{r}
+shapiro.test(P5For$St) #(n<50) 
+#lillie.test(P5For$St) #(n>=50)
+#St for P5For, non-normal
+```
+
+P5Agr site
+
+```{r}
+#P5Agr
+shapiro.test(P5Agr$St) #(n<50) 
+#lillie.test(P5Agr$St) #(n>=50)
+#St for P5Agr, non-normal
+```
+
+If the variable does not have a normal distribution, a non-parametric test (Wilcox test) was performed to find out if there were significant differences between the variables within the sites per polygon.
+
+If both sites were found to have a normal distribution, a parametric test (Student's t-test) was performed to see if there were any significant differences.
+
+If a site is found to have a normal distribution, the Wilcox test and Student's t-test were applied to compare the results of both tests.
+
+c) Test to find if there are significant differences in St
+
+- Between polygons
+
+Search for significant differences between polygons
+
+```{r}
+wilcox.test(data=Sg.env,St~Polygon,exact=F)
+#If there are significant differences between polygons
+```
+
+-Between sites within each polygon
+
+Search for significant differences between sites within polygon 6
+
+```{r}
+wilcox.test(data=P6,St~Site,exact=F) 
+#No significant differences
+```
+
+Search for significant differences between sites within polygon 5
+
+```{r}
+wilcox.test(data=P5,St~Site,exact=F) 
+#No significant differences
+```
+
+#### Air temperature (At)
+
+a) Plot of At between sites within the polygons
+
+```{r}
+#Plot with St between sites within polygons
+(Sg.At.plot<-ggplot(data=Sg.env, #Database
+             aes(x=Site_ID,y=At))+ #Axis definition
+             geom_boxplot(aes(fill=Site))+ #Geometry definition
+             geom_jitter(aes(fill=Site),width=0.3)+ #Geometry definition
+             facet_wrap(~Polygon,scale="free_x")+ #Split plots
+             ylab("Air temperature (°C)")+ #y-axis legend
+             scale_fill_brewer(palette="Dark2")+ #Colors definition
+             scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+             theme_bw()+ #Canvas definition
+             theme(legend.position="none",axis.title.x=element_blank(), #Remove title of x-axis
+             strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+             axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+             axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.At.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+b) Normality tests to determine if At has a normal distribution
+
+- All sites
+
+Normality test of At with all the data
+
+```{r}
+#The activated test is the one used depending on the number of n of the sample
+#Lillie test used to n>=50
+lillie.test(Sg.env$At)
+#At for all data, non-normal
+```
+
+- By sites
+
+Normality test for At within each site
+
+P6For site
+
+```{r}
+shapiro.test(P6For$At) #(n<50) 
+#lillie.test(P6For$At) #(n>=50)
+#St for P6For, non-normal
+```
+
+P6Agr site
+
+```{r}
+shapiro.test(P6Agr$At) #(n<50) 
+#lillie.test(P6Agr$At) #(n>=50)
+#At for P6Agr, normal
+```
+
+P5For site
+
+```{r}
+shapiro.test(P5For$At) #(n<50) 
+#lillie.test(P5For$At) #(n>=50)
+#St for P5For, normal
+```
+
+P5Agr site
+
+```{r}
+#P5Agr
+shapiro.test(P5Agr$At) #(n<50) 
+#lillie.test(P5Agr$At) #(n>=50)
+#St for P5Agr, normal
+```
+
+c) Test to find if there are significant differences in St
+
+- Between polygons
+
+Search for significant differences between polygons
+
+```{r}
+#Search for significant differences between sites within polygon 6
+wilcox.test(data=Sg.env,At~Polygon,exact=F)
+#If there are significant differences between polygons
+```
+
+-Between sites within each polygon
+
+Search for significant differences between sites within polygon 6
+
+```{r}
+wilcox.test(data=P6,At~Site,exact=F)
+#No significant differences
+```
+
+```{r}
+t.test(data=P6,At~Site,alternative="two.sided")
+#No significant differences
+```
+
+Search for significant differences between sites within polygon 5
+
+```{r}
+t.test(data=P5,At~Site,alternative="two.sided")
+#No significant differences
+```
+
+#### Relative Humidity (RH)
+
+a) Plot of At between sites within the polygons
+
+```{r}
+#Plot with St between sites within polygons
+(Sg.RH.plot<-ggplot(data=Sg.env, #Database
+             aes(x=Site_ID,y=RH))+ #Axis definition
+             geom_boxplot(aes(fill=Site))+ #Geometry definition
+             geom_jitter(aes(fill=Site),width=0.3)+ #Geometry definition
+             facet_wrap(~Polygon,scale="free_x")+ #Split plots
+             ylab("Relative Humidity (%)")+ #y-axis legend
+             scale_fill_brewer(palette="Dark2")+ #Colors definition
+             scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+             theme_bw()+ #Canvas definition
+             theme(legend.position="none",axis.title.x=element_blank(), #Remove title of x-axis
+             strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+             axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+             axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.RH.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+b) Normality tests to determine if RH has a normal distribution
+
+- All sites
+
+Normality test of RH with all the data
+
+```{r}
+#The activated test is the one used depending on the number of n of the sample
+
+#Shapiro test used to n<50
+#shapiro.test(Sg.env$RH)
+
+#Lillie test used to n>=50
+lillie.test(Sg.env$RH)
+#At for all data, non-normal
+```
+
+- By sites
+
+Normality test for RH within each site
+
+P6For site
+
+```{r}
+shapiro.test(P6For$RH) #(n<50) 
+#lillie.test(P6For$RH) #(n>=50)
+#St for P6For, non-normal
+```
+
+P6Agr site
+
+```{r}
+shapiro.test(P6Agr$RH) #(n<50) 
+#lillie.test(P6Agr$RH) #(n>=50)
+#At for P6Agr, non-normal
+```
+
+P5For site
+
+```{r}
+shapiro.test(P5For$RH) #(n<50) 
+#lillie.test(P5For$RH) #(n>=50)
+#St for P5For, non-normal
+```
+
+P5Agr site
+
+```{r}
+#P5Agr
+shapiro.test(P5Agr$RH) #(n<50) 
+#lillie.test(P5Agr$RH) #(n>=50)
+#St for P5Agr, non-normal
+```
+
+c) Test to find if there are significant differences in RH
+
+- Between polygons
+
+Search for significant differences between polygons
+
+```{r}
+#Search for significant differences between sites within polygon 6
+wilcox.test(data=Sg.env,RH~Polygon,exact=F)
+#If there are significant differences between polygons
+```
+
+-Between sites within each polygon
+
+Search for significant differences between sites within polygon 6
+
+```{r}
+wilcox.test(data=P6,RH~Site,exact=F)
+#If there are significant differences between polygons
+```
+
+Search for significant differences between sites within polygon 5
+
+```{r}
+wilcox.test(data=P5,RH~Site,exact=F)
+#If there are significant differences between polygons
+```
+
+#### Slope
+
+a) Plot of Slope between sites within the polygons
+
+```{r}
+#Plot with St between sites within polygons
+(Sg.Slope.plot<-ggplot(data=Sg.env, #Database
+             aes(x=Site_ID,y=Slope))+ #Axis definition
+             geom_boxplot(aes(fill=Site))+ #Geometry definition
+             geom_jitter(aes(fill=Site),width=0.3)+ #Geometry definition
+             facet_wrap(~Polygon,scale="free_x")+ #Split plots
+             ylab("Slope (<)")+ #y-axis legend
+             scale_fill_brewer(palette="Dark2")+ #Colors definition
+             scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+             theme_bw()+ #Canvas definition
+             theme(legend.position="none",axis.title.x=element_blank(), #Remove title of x-axis
+             strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+             axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+             axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.Slope.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+b) Normality tests to determine if RH has a normal distribution
+
+- All sites
+
+Normality test of Slope with all the data
+
+```{r}
+#The activated test is the one used depending on the number of n of the sample
+
+#Shapiro test used to n<50
+#shapiro.test(Sg.env$Slope)
+
+#Lillie test used to n>=50
+lillie.test(Sg.env$Slope)
+#At for all data, non-normal
+```
+
+- By sites
+
+Normality test for RH within each site
+
+P6For site
+
+```{r}
+shapiro.test(P6For$Slope) #(n<50) 
+#lillie.test(P6For$Slope) #(n>=50)
+#St for P6For, non-normal
+```
+
+P6Agr site
+
+```{r}
+shapiro.test(P6Agr$Slope) #(n<50) 
+#lillie.test(P6Agr$Slope) #(n>=50)
+#At for P6Agr, non-normal
+```
+
+P5For site
+
+```{r}
+shapiro.test(P5For$Slope) #(n<50) 
+#lillie.test(P5For$Slope) #(n>=50)
+#St for P5For, non-normal
+```
+
+P5Agr site
+
+```{r}
+#P5Agr
+shapiro.test(P5Agr$Slope) #(n<50) 
+#lillie.test(P5Agr$Slope) #(n>=50)
+#St for P5Agr, non-normal
+```
+
+c) Test to find if there are significant differences in Slope
+
+- Between polygons
+
+Search for significant differences between polygons
+
+```{r}
+#Search for significant differences between sites within polygon 6
+wilcox.test(data=Sg.env,Slope~Polygon,exact=F)
+#If there are significant differences between polygons
+```
+
+-Between sites within each polygon
+
+Search for significant differences between sites within polygon 6
+
+```{r}
+wilcox.test(data=P6,Slope~Site,exact=F)
+#If there are significant differences between polygons
+```
+
+Search for significant differences between sites within polygon 5
+
+```{r}
+wilcox.test(data=P5,Slope~Site,exact=F)
+#If there are significant differences between polygons
+```
+
+#### Digital elevation model (DEM)
+
+a) Plot of Slope between sites within the polygons
+
+```{r}
+#Plot with St between sites within polygons
+(Sg.DEM.plot<-ggplot(data=Sg.env, #Database
+             aes(x=Site_ID,y=DEM))+ #Axis definition
+             geom_boxplot(aes(fill=Site))+ #Geometry definition
+             geom_jitter(aes(fill=Site),width=0.3)+ #Geometry definition
+             facet_wrap(~Polygon,scale="free_x")+ #Split plots
+             ylab("Height (m)")+ #y-axis legend
+             scale_fill_brewer(palette="Dark2")+ #Colors definition
+             scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+             theme_bw()+ #Canvas definition
+             theme(legend.position="none",axis.title.x=element_blank(), #Remove title of x-axis
+             strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+             axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+             axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.DEM.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+b) Normality tests to determine if DEM has a normal distribution
+
+- All sites
+
+Normality test of DEM with all the data
+
+```{r}
+#The activated test is the one used depending on the number of n of the sample
+
+#Shapiro test used to n<50
+#shapiro.test(Sg.env$DEM)
+
+#Lillie test used to n>=50
+lillie.test(Sg.env$DEM)
+#At for all data, non-normal
+```
+
+- By sites
+
+Normality test for DEM within each site
+
+P6For site
+
+```{r}
+shapiro.test(P6For$DEM) #(n<50) 
+#lillie.test(P6For$DEM) #(n>=50)
+#St for P6For, non-normal
+```
+
+P6Agr site
+
+```{r}
+shapiro.test(P6Agr$DEM) #(n<50) 
+#lillie.test(P6Agr$DEM) #(n>=50)
+#At for P6Agr, non-normal
+```
+
+P5For site
+
+```{r}
+shapiro.test(P5For$DEM) #(n<50) 
+#lillie.test(P5For$DEM) #(n>=50)
+#St for P5For, non-normal
+```
+
+P5Agr site
+
+```{r}
+#P5Agr
+shapiro.test(P5Agr$DEM) #(n<50) 
+#lillie.test(P5Agr$DEM) #(n>=50)
+#St for P5Agr, non-normal
+```
+
+c) Test to find if there are significant differences in DEM
+
+- Between polygons
+
+Search for significant differences between polygons
+
+```{r}
+#Search for significant differences between sites within polygon 6
+wilcox.test(data=Sg.env,DEM~Polygon,exact=F)
+#If there are significant differences between polygons
+```
+
+-Between sites within each polygon
+
+Search for significant differences between sites within polygon 6
+
+```{r}
+wilcox.test(data=P6,DEM~Site,exact=F)
+#If there are significant differences between polygons
+```
+
+Search for significant differences between sites within polygon 5
+
+```{r}
+wilcox.test(data=P5,DEM~Site,exact=F)
+#If there are significant differences between polygons
+```
+
+#### Moisture Stress Index (MSI)
+
+a) Plot of Slope between sites within the polygons
+
+```{r}
+#Plot with St between sites within polygons
+(Sg.MSI.plot<-ggplot(data=Sg.env, #Database
+             aes(x=Site_ID,y=MSI))+ #Axis definition
+             geom_boxplot(aes(fill=Site))+ #Geometry definition
+             geom_jitter(aes(fill=Site),width=0.3)+ #Geometry definition
+             facet_wrap(~Polygon,scale="free_x")+ #Split plots
+             ylab("Moisture Stress Index (m)")+ #y-axis legend
+             scale_fill_brewer(palette="Dark2")+ #Colors definition
+             scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+             theme_bw()+ #Canvas definition
+             theme(legend.position="none",axis.title.x=element_blank(), #Remove title of x-axis
+             strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+             axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+             axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.MSI.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+b) Normality tests to determine if MSI has a normal distribution
+
+- All sites
+
+Normality test of MSI with all the data
+
+```{r}
+#The activated test is the one used depending on the number of n of the sample
+
+#Shapiro test used to n<50
+#shapiro.test(Sg.env$DEM)
+
+#Lillie test used to n>=50
+lillie.test(Sg.env$MSI)
+#At for all data, non-normal
+```
+
+- By sites
+
+Normality test for MSI within each site
+
+P6For site
+
+```{r}
+shapiro.test(P6For$MSI) #(n<50) 
+#lillie.test(P6For$MSI) #(n>=50)
+#St for P6For, non-normal
+```
+
+P6Agr site
+
+```{r}
+shapiro.test(P6Agr$MSI) #(n<50) 
+#lillie.test(P6Agr$MSI) #(n>=50)
+#At for P6Agr, non-normal
+```
+
+P5For site
+
+```{r}
+shapiro.test(P5For$MSI) #(n<50) 
+#lillie.test(P5For$MSI) #(n>=50)
+#St for P5For, non-normal
+```
+
+P5Agr site
+
+```{r}
+#P5Agr
+shapiro.test(P5Agr$MSI) #(n<50) 
+#lillie.test(P5Agr$MSI) #(n>=50)
+#St for P5Agr, non-normal
+```
+
+c) Test to find if there are significant differences in MSI
+
+- Between polygons
+
+Search for significant differences between polygons
+
+```{r}
+#Search for significant differences between sites within polygon 6
+wilcox.test(data=Sg.env,MSI~Polygon,exact=F)
+#If there are significant differences between polygons
+```
+
+-Between sites within each polygon
+
+Search for significant differences between sites within polygon 6
+
+```{r}
+wilcox.test(data=P6,MSI~Site,exact=F)
+#If there are significant differences between polygons
+```
+
+Search for significant differences between sites within polygon 5
+
+```{r}
+wilcox.test(data=P5,MSI~Site,exact=F)
+#If there are significant differences between polygons
+```
+
+#### Body temperature (°C)
+
+a) Plot of Slope between sites within the polygons
+
+```{r}
+#Plot with St between sites within polygons
+(Sg.Bt.plot<-ggplot(data=Sg.env, #Database
+             aes(x=Site_ID,y=Bt))+ #Axis definition
+             geom_boxplot(aes(fill=Site))+ #Geometry definition
+             geom_jitter(aes(fill=Site),width=0.3)+ #Geometry definition
+             facet_wrap(~Polygon,scale="free_x")+ #Split plots
+             ylab("Body temperature (°C)")+ #y-axis legend
+             scale_fill_brewer(palette="Dark2")+ #Colors definition
+             scale_x_discrete(labels=c("Agr","For"))+ #Rename groups of x-axis
+             theme_bw()+ #Canvas definition
+             theme(legend.position="none",axis.title.x=element_blank(), #Remove title of x-axis
+             strip.text.x=element_text(size=10,color="black"), #Size and color of strip.text.x
+             axis.text.x=element_text(size=10,color="black"), #Size and color of axis.text.x
+             axis.text.y=element_text(size=9,color="black"))) #Size and color of axis.text.y
+```
+
+Save plot to pdf file
+
+```{r}
+ggsave("Analysis/Env_Vars/Figures/Sg.Bt.plot.pdf",dpi=300,limitsize=TRUE,
+       width=10,height=7)
+```
+
+b) Normality tests to determine if Bt has a normal distribution
+
+- All sites
+
+Normality test of Bt with all the data
+
+```{r}
+#The activated test is the one used depending on the number of n of the sample
+
+#Shapiro test used to n<50
+#shapiro.test(Sg.env$Bt)
+
+#Lillie test used to n>=50
+lillie.test(Sg.env$Bt)
+#At for all data, non-normal
+```
+
+- By sites
+
+Normality test for Bt within each site
+
+P6For site
+
+```{r}
+shapiro.test(P6For$Bt) #(n<50) 
+#lillie.test(P6For$Bt) #(n>=50)
+#St for P6For, non-normal
+```
+
+P6Agr site
+
+```{r}
+shapiro.test(P6Agr$Bt) #(n<50) 
+#lillie.test(P6Agr$Bt) #(n>=50)
+#At for P6Agr, normal
+```
+
+P5For site
+
+```{r}
+shapiro.test(P5For$Bt) #(n<50) 
+#lillie.test(P5For$Bt) #(n>=50)
+#St for P5For, non-normal
+```
+
+P5Agr site
+
+```{r}
+#P5Agr
+shapiro.test(P5Agr$Bt) #(n<50) 
+#lillie.test(P5Agr$Bt) #(n>=50)
+#St for P5Agr, non-normal
+```
+
+c) Test to find if there are significant differences in Bt
+
+- Between polygons
+
+Search for significant differences between polygons
+
+```{r}
+wilcox.test(data=Sg.env,Bt~Polygon,exact=F)
+#If there are significant differences between polygons
+```
+
+-Between sites within each polygon
+
+Search for significant differences between sites within polygon 6
+
+Wilcox test
+
+```{r}
+wilcox.test(data=P6,Bt~Site,exact=F)
+#No significant differences
+```
+
+t Student test
+
+```{r}
+t.test(data=P6,Bt~Site,alternative="two.sided")
+#No significant differences
+```
+
+Search for significant differences between sites within polygon 5
+
+```{r}
+wilcox.test(data=P5,Bt~Site,exact=F)
+#No significant differences
+```
